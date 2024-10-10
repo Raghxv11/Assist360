@@ -2,18 +2,18 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDsXwtiUrvm3i8nPXxyF4vG42qHH0TFVdw",
-  authDomain: "visualizer-authenticatio-919a8.firebaseapp.com",
-  projectId: "visualizer-authenticatio-919a8",
-  storageBucket: "visualizer-authenticatio-919a8.appspot.com",
-  messagingSenderId: "529501363131",
-  appId: "1:529501363131:web:a09a2cc809067ab4edc29e",
-  measurementId: "G-WWTMPZLDR7"
+  apiKey: "AIzaSyBO6oqU9jai7g211Z1NZGwqz0Gu96ZUed4",
+  authDomain: "cse360-f195e.firebaseapp.com",
+  projectId: "cse360-f195e",
+  storageBucket: "cse360-f195e.appspot.com",
+  messagingSenderId: "315312139125",
+  appId: "1:315312139125:web:118c3b6ac14490739f013c"
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app)
+const FIRESTORE_DB = getFirestore(app)
 
 
 
-export { app, auth };
+export { app, auth, FIRESTORE_DB };
