@@ -17,6 +17,8 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [userData, setUserData] = useState(null);
 
+  const [isUserAdmin, setIsUserAdmin] = useState(false);
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, initializeUser);
     return unsubscribe;
@@ -35,6 +37,7 @@ export function AuthProvider({ children }) {
 
       const userData = await getUserByID(user.uid, user.email);
       setUserData(userData);
+      setIsUserAdmin(userData?.roles?.includes("admin"));
 
       // check if the auth provider is google or not
     //   const isGoogle = user.providerData.some(
@@ -58,12 +61,14 @@ export function AuthProvider({ children }) {
     currentUser,
     setCurrentUser,
     userData,
-    setUserData
+    setUserData,
+    isUserAdmin,
+    setIsUserAdmin
   };
 
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      { children}
     </AuthContext.Provider>
   );
 }
