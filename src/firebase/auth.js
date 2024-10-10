@@ -8,12 +8,20 @@ import {
   signInWithPopup,
   GoogleAuthProvider,
 } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, setDoc } from "firebase/firestore";
 export const doCreateUserWithEmailAndPassword = async (email, password) => {
   await createUserWithEmailAndPassword(auth, email, password);
-
-  await getDoc(doc(FIRESTORE_DB, "users", email));
-
+  const users = await getDocs(collection(FIRESTORE_DB, "users"));
+  //if its a first user, set it as admin
+  let isAdmin = false;
+  if (users.empty) {
+    isAdmin = true;
+  }
+  await setDoc(doc(FIRESTORE_DB, "users", email), {
+    email: email,
+    password: password,
+    roles: [isAdmin ? "admin" : "student"],
+  });
 };
 
 export const doSignInWithEmailAndPassword = (email, password) => {

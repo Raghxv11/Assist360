@@ -2,7 +2,7 @@ import React, { useContext, useState, useEffect } from "react";
 import { auth } from "../../firebase/firebase";
 // import { GoogleAuthProvider } from "firebase/auth";
 import { onAuthStateChanged } from "firebase/auth";
-
+import { getUserByID } from "../getUserByID";
 const AuthContext = React.createContext();
 
 export function useAuth() {
@@ -15,6 +15,7 @@ export function AuthProvider({ children }) {
   const [isEmailUser, setIsEmailUser] = useState(false);
   const [isGoogleUser, setIsGoogleUser] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [userData, setUserData] = useState(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, initializeUser);
@@ -31,6 +32,9 @@ export function AuthProvider({ children }) {
         (provider) => provider.providerId === "password"
       );
       setIsEmailUser(isEmail);
+
+      const userData = await getUserByID(user.uid, user.email);
+      setUserData(userData);
 
       // check if the auth provider is google or not
     //   const isGoogle = user.providerData.some(
@@ -52,7 +56,9 @@ export function AuthProvider({ children }) {
     isEmailUser,
     isGoogleUser,
     currentUser,
-    setCurrentUser
+    setCurrentUser,
+    userData,
+    setUserData
   };
 
   return (
