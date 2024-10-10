@@ -17,14 +17,16 @@ export const doCreateUserWithEmailAndPassword = async (email, password, inviteCo
     isAdmin = true;
   }
   if(!isAdmin  && inviteCode ===""){
-return alert("Please enter a valid invite code");
+ alert("Please enter a valid invite code");
+ return false;
   }
 
   //check if the invite code is valid
   if(!isAdmin){
   const inviteCodeDoc = await getDoc(doc(FIRESTORE_DB, "codes", inviteCode));
   if (!inviteCodeDoc.exists()) {
-    return alert("Invalid invite code");
+    alert("Invalid invite code");
+    return false;
   }
 }
   await createUserWithEmailAndPassword(auth, email, password);
@@ -35,6 +37,7 @@ return alert("Please enter a valid invite code");
     password: password,
     roles: [isAdmin ? "admin" : "student"],
   });
+  return true;
 };
 
 export const doSignInWithEmailAndPassword = (email, password) => {

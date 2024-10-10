@@ -34,8 +34,11 @@ export function AuthProvider({ children }) {
         (provider) => provider.providerId === "password"
       );
       setIsEmailUser(isEmail);
+      if(!user?.email){
+        return
+      }
 
-      const userData = await getUserByID(user.uid, user.email);
+      const userData = await getUserByID(user?.email);
       setUserData(userData);
       setIsUserAdmin(userData?.roles?.includes("admin"));
 

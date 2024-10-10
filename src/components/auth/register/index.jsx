@@ -30,8 +30,12 @@ const Register = () => {
                     if (password !== confirmPassword) {
                         throw new Error("Passwords don't match")
                     }
-                    await doCreateUserWithEmailAndPassword(email, password, invitationCode)
+                   const result = await doCreateUserWithEmailAndPassword(email, password, invitationCode)
+                   if(!result){
+                    return setErrorMessage("Invalid invite code")
                 }
+                }
+                
                 // Successful login/registration
                 if(userData){
 if(userData?.roles?.includes("admin")){
