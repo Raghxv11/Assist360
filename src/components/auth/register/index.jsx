@@ -15,7 +15,7 @@ const Register = () => {
     const [isLogin, setIsLogin] = useState(false)
     const [isProcessing, setIsProcessing] = useState(false)
     const [invitationCode, setInvitationCode] = useState('')
-    const { userLoggedIn } = useAuth()
+    const { userLoggedIn, userData } = useAuth()
 
     const onSubmit = async (e) => {
         e.preventDefault()
@@ -30,10 +30,16 @@ const Register = () => {
                     if (password !== confirmPassword) {
                         throw new Error("Passwords don't match")
                     }
-                    await doCreateUserWithEmailAndPassword(email, password)
+                    await doCreateUserWithEmailAndPassword(email, password, invitationCode)
                 }
                 // Successful login/registration
-                navigate('/home')
+                if(userData){
+if(userData?.roles?.includes("admin")){
+    navigate('/admin')
+}else{
+    navigate('/home')
+}
+                }
             } catch (error) {
                 setErrorMessage(error.message)
             } finally {

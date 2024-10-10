@@ -10,7 +10,6 @@ import {
 } from "firebase/auth";
 import { collection, deleteDoc, doc, getDoc, getDocs, setDoc } from "firebase/firestore";
 export const doCreateUserWithEmailAndPassword = async (email, password, inviteCode) => {
-  await createUserWithEmailAndPassword(auth, email, password);
   const users = await getDocs(collection(FIRESTORE_DB, "users"));
   //if its a first user, set it as admin
   let isAdmin = false;
@@ -22,10 +21,14 @@ return alert("Please enter a valid invite code");
   }
 
   //check if the invite code is valid
+  if(!isAdmin){
   const inviteCodeDoc = await getDoc(doc(FIRESTORE_DB, "codes", inviteCode));
   if (!inviteCodeDoc.exists()) {
     return alert("Invalid invite code");
   }
+}
+  await createUserWithEmailAndPassword(auth, email, password);
+
   await deleteDoc(doc(FIRESTORE_DB, "codes", inviteCode));
   await setDoc(doc(FIRESTORE_DB, "users", email), {
     email: email,

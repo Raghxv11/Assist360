@@ -6,12 +6,13 @@ import Admin from "./components/admin";
 
 import { AuthProvider } from "./contexts/authContext";
 import { useRoutes } from "react-router-dom";
+import Home from "./components/auth/home";
 
 function App() {
   const routesArray = [
     {
       path: "*",
-      element: <Login />,
+      element: <Home />,
     },
     {
       path: "/login",
