@@ -2,7 +2,7 @@ import Login from "./components/auth/login";
 import Register from "./components/auth/register";
 
 import Header from "./components/header";
-import Home from "./components/home";
+import Admin from "./components/admin";
 
 import { AuthProvider } from "./contexts/authContext";
 import { useRoutes } from "react-router-dom";
@@ -22,8 +22,8 @@ function App() {
       element: <Register />,
     },
     {
-      path: "/home",
-      element: <Home />,
+      path: "/admin",
+      element: <Admin />,
     },
   ];
   let routesElement = useRoutes(routesArray);
