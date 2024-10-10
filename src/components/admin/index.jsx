@@ -1,6 +1,6 @@
 import { React, useEffect, useState } from 'react'
-import { getAuth, signOut } from 'firebase/auth'
-import { getFirestore, collection, getDocs, doc, deleteDoc, updateDoc, addDoc, setDoc } from 'firebase/firestore'
+import { getAuth, sendPasswordResetEmail, signOut } from 'firebase/auth'
+import { getFirestore, collection, getDocs, doc, deleteDoc, updateDoc, setDoc } from 'firebase/firestore'
 import { useNavigate } from 'react-router-dom'
 
 const Admin = () => {
@@ -21,7 +21,7 @@ const Admin = () => {
   const resetPassword = async (email) => {
     const auth = getAuth()
     try {
-      await auth.sendPasswordResetEmail(email)
+      await sendPasswordResetEmail(auth, email)
       alert('Password reset email sent')
     } catch (error) {
       console.error('Error sending password reset email:', error)
@@ -45,29 +45,24 @@ const Admin = () => {
     }
   }
 
-  const switchRole = async (userId, currentRole) => {
+  const toggleRole = async (userId, role) => {
     const db = getFirestore()
-    let newRole
-    switch (currentRole) {
-      case 'admin':
-        newRole = 'student'
-        break
-      case 'student':
-        newRole = 'instructor'
-        break
-      case 'instructor':
-        newRole = 'admin'
-        break
-      default:
-        newRole = 'student'
+    const user = users.find(u => u.id === userId)
+    let newRoles = [...(user.roles || [])]
+    
+    if (newRoles.includes(role)) {
+      newRoles = newRoles.filter(r => r !== role)
+    } else {
+      newRoles.push(role)
     }
+
     try {
-      await updateDoc(doc(db, 'users', userId), { roles: [newRole] })
-      setUsers(users.map(user => user.id === userId ? { ...user, roles: [newRole] } : user))
-      alert(`User role updated to ${newRole} successfully`)
+      await updateDoc(doc(db, 'users', userId), { roles: newRoles })
+      setUsers(users.map(u => u.id === userId ? { ...u, roles: newRoles } : u))
+      alert(`User roles updated successfully`)
     } catch (error) {
-      console.error('Error updating user role:', error)
-      alert('Error updating user role')
+      console.error('Error updating user roles:', error)
+      alert('Error updating user roles')
     }
   }
 
@@ -75,7 +70,7 @@ const Admin = () => {
     const db = getFirestore()
     const inviteCode = Math.random().toString(36).substring(2, 10).toUpperCase()
     try {
-      await setDoc(doc(db, 'codes',inviteCode), {
+      await setDoc(doc(db, 'codes', inviteCode), {
         code: inviteCode,
         createdAt: new Date(),
         used: false
@@ -95,36 +90,28 @@ const Admin = () => {
 
   return (
     <div className='text-black mt-4 text-xl pt-12'>
-      <div className="mb-4 space-x-4">
+      <div className="mb-4">
         <button 
           onClick={generateInviteCode} 
           className="bg-purple-500 text-white px-4 py-2 rounded"
         >
           Invite User
         </button>
-        <button
-          onClick={logout}
-          className="bg-purple-500 text-white px-4 py-2 rounded"
-        >
-          Logout
-        </button>
       </div>
       <table className="min-w-full bg-white border border-gray-300">
         <thead>
           <tr>
-            <th className="py-2 px-4 border-b">Username</th>
+            <th className="py-2 px-4 border-b">Email</th>
+            <th className="py-2 px-4 border-b">Roles</th>
             <th className="py-2 px-4 border-b">Actions</th>
-            
           </tr>
         </thead>
         <tbody>
           {users.map(user => (
             <tr key={user.id}>
-              <td className="py-2 px-4 border-b">{user.email.replace("@gmail.com", "")}
-
-                { <span className='bg-green-500 p-1 text-sm ml-4 text-red-500'>
-                  {user?.roles?.join(", ")}
-                  </span>}
+              <td className="py-2 px-4 border-b">{user.email}</td>
+              <td className="py-2 px-4 border-b">
+                {user.roles?.join(", ") || "No roles"}
               </td>
               <td className="py-2 px-4 border-b">
                 <button onClick={() => resetPassword(user.email)} className="bg-blue-500 text-white px-2 py-1 rounded mr-2">
@@ -133,9 +120,15 @@ const Admin = () => {
                 <button onClick={() => deleteUser(user.id, user.email)} className="bg-red-500 text-white px-2 py-1 rounded mr-2">
                   Delete User
                 </button>
-                <button onClick={() => switchRole(user.id, user.roles[0])} className="bg-green-500 text-white px-2 py-1 rounded">
-                  Switch Role
-                </button>
+                {['admin', 'student', 'instructor'].map(role => (
+                  <button 
+                    key={role}
+                    onClick={() => toggleRole(user.id, role)} 
+                    className={`${user.roles?.includes(role) ? 'bg-green-500' : 'bg-gray-300'} text-white px-2 py-1 rounded mr-2`}
+                  >
+                    {role}
+                  </button>
+                ))}
               </td>
             </tr>
           ))}
