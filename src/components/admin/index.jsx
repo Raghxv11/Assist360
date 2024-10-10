@@ -16,7 +16,7 @@ const Admin = () => {
     }
     return (
         <>
-        <div className="admin-page">
+        <div className='text-2xl font-bold pt-14'>
             <h1>Admin Panel</h1>
             <button onClick={generateInviteCode}>Invite</button>
             {inviteCode && <p>Generated Code: {inviteCode}</p>}
@@ -25,9 +25,7 @@ const Admin = () => {
             <button>Manage Users</button>
             <button>List users</button>
             <button>Logout</button>
-
         </div>
-
         </>
     )
 }
