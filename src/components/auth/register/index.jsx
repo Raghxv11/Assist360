@@ -1,53 +1,59 @@
 import React, { useState } from 'react'
-import { Navigate, Link, useNavigate } from 'react-router-dom'
-import { useAuth } from '../../../contexts/authContext'
-import { doCreateUserWithEmailAndPassword, doSignInWithEmailAndPassword } from '../../../firebase/auth'
+import { Navigate, Link, useNavigate } from 'react-router-dom' // Import necessary hooks from React Router
+import { useAuth } from '../../../contexts/authContext' // Import the authentication context
+import { doCreateUserWithEmailAndPassword, doSignInWithEmailAndPassword } from '../../../firebase/auth' // Import Firebase auth methods
 
+// The Register component handles both user registration and login
 const Register = () => {
 
-    const navigate = useNavigate()
+    const navigate = useNavigate() // Initialize navigation hook for programmatic navigation
 
-    const [email, setEmail] = useState('')
-    const [password, setPassword] = useState('')
-    const [confirmPassword, setconfirmPassword] = useState('')
-    const [isRegistering, setIsRegistering] = useState(false)
-    const [errorMessage, setErrorMessage] = useState('')
-    const [isLogin, setIsLogin] = useState(false)
-    const [isProcessing, setIsProcessing] = useState(false)
-    const [invitationCode, setInvitationCode] = useState('')
-    const { userLoggedIn, userData } = useAuth()
+    // Local state to manage form inputs and various states
+    const [email, setEmail] = useState('') // State to store the email input
+    const [password, setPassword] = useState('') // State to store the password input
+    const [confirmPassword, setconfirmPassword] = useState('') // State to store the confirm password input
+    const [isRegistering, setIsRegistering] = useState(false) // State to track if the user is registering
+    const [errorMessage, setErrorMessage] = useState('')  // State to store error messages
+    const [isLogin, setIsLogin] = useState(false) // State to toggle between login and registration
+    const [isProcessing, setIsProcessing] = useState(false) // State to manage whether the form is processing
+    const [invitationCode, setInvitationCode] = useState('') // State to store the invitation code input
+    const { userLoggedIn, userData } = useAuth() // Destructure the authentication state from context
 
+     // Function to handle the form submission (registration or login)
     const onSubmit = async (e) => {
-        e.preventDefault()
-        if (!isProcessing) {
-            setIsProcessing(true)
-            setErrorMessage('')
+        e.preventDefault() // Prevent the default form submission behavior
+        if (!isProcessing) { // Check if the form is not already processing
+            setIsProcessing(true) // Set the form to processing state
+            setErrorMessage('') // Clear any previous error messages
             
             try {
                 if (isLogin) {
+                     // If the user is logging in, call the sign-in function
                     await doSignInWithEmailAndPassword(email, password)
                 } else {
+                    // If the user is registering, ensure passwords match
                     if (password !== confirmPassword) {
-                        throw new Error("Passwords don't match")
+                        throw new Error("Passwords don't match") // Throw an error if passwords don't match
                     }
+                    // Create the user with email, password, and invitation code
                    const result = await doCreateUserWithEmailAndPassword(email, password, invitationCode)
                    if(!result){
                     return setErrorMessage("Invalid invite code")
                 }
                 }
                 
-                // Successful login/registration
+                // After successful login/registration, navigate based on the user's role
                 if(userData){
 if(userData?.roles?.includes("admin")){
-    navigate('/admin')
+    navigate('/admin') // Navigate to admin page if the user is an admin
 }else{
-    navigate('/home')
+    navigate('/home') // Otherwise, navigate to the home page
 }
                 }
             } catch (error) {
-                setErrorMessage(error.message)
+                setErrorMessage(error.message) // Display any error messages that occur
             } finally {
-                setIsProcessing(false)
+                setIsProcessing(false) // Set processing state to false when finished
             }
         }
     }

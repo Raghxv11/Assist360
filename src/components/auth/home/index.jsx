@@ -3,18 +3,21 @@ import { Navigate, Link, useNavigate } from 'react-router-dom'
 import { doSignInWithEmailAndPassword, doSignInWithGoogle } from '../../../firebase/auth'
 import { useAuth } from '../../../contexts/authContext'
 
+// The Home component, which is the user's landing page after login.
 const Home = () => {
+    // Destructure user authentication state from the context
     const { userLoggedIn, userData } = useAuth()
-
+    // Local state to manage email, password, signing-in state, and error messages
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [isSigningIn, setIsSigningIn] = useState(false)
     const [errorMessage, setErrorMessage] = useState('');
 
-     const navigate = useNavigate()
-
+    // useNavigate hook from React Router to programmatically navigate between routes
+    const navigate = useNavigate()
+     // If the user is not logged in, redirect them to the login page
     if (!userLoggedIn) {
-        return <Navigate to="/login" />
+        return <Navigate to="/login" /> // Redirect to login if user is not authenticated
     }
 
     return (

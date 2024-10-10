@@ -1,10 +1,9 @@
-import { React, useEffect, useState } from 'react'
-import { getAuth, sendPasswordResetEmail, signOut } from 'firebase/auth'
-import { getFirestore, collection, getDocs, doc, deleteDoc, updateDoc, setDoc } from 'firebase/firestore'
-import { useNavigate } from 'react-router-dom'
+import { React } from 'react' // Import React, useState, and useEffect hooks for state management and lifecycle
 
+// The Student component is designed to handle the view for users with student roles.
 const Student = () => {
   
+  // Here you can implement the functionality to fetch student-related data or handle student-specific actions
 
   return (
     <div className='text-black mt-4 text-xl pt-12'>
