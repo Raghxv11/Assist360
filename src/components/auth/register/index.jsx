@@ -14,7 +14,6 @@ const Register = () => {
     const [errorMessage, setErrorMessage] = useState('')
     const [isLogin, setIsLogin] = useState(false)
     const [isProcessing, setIsProcessing] = useState(false)
-    const [invitationCode, setInvitationCode] = useState('')
     const { userLoggedIn, userData } = useAuth()
 
     const onSubmit = async (e) => {
@@ -30,19 +29,16 @@ const Register = () => {
                     if (password !== confirmPassword) {
                         throw new Error("Passwords don't match")
                     }
-                   const result = await doCreateUserWithEmailAndPassword(email, password, invitationCode)
-                   if(!result){
-                    return setErrorMessage("Invalid invite code")
-                }
+                    await doCreateUserWithEmailAndPassword(email, password)
                 }
                 
                 // Successful login/registration
                 if(userData){
-if(userData?.roles?.includes("admin")){
-    navigate('/admin')
-}else{
-    navigate('/home')
-}
+                    if(userData?.roles?.includes("admin")){
+                        navigate('/admin')
+                    }else{
+                        navigate('/home')
+                    }
                 }
             } catch (error) {
                 setErrorMessage(error.message)
@@ -108,19 +104,6 @@ if(userData?.roles?.includes("admin")){
                                         autoComplete='off'
                                         required={!isLogin}
                                         value={confirmPassword} onChange={(e) => { setconfirmPassword(e.target.value) }}
-                                        className="w-full mt-2 px-3 py-2 text-gray-500 bg-transparent outline-none border focus:border-indigo-600 shadow-sm rounded-lg transition duration-300"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="text-sm text-gray-600 font-bold">
-                                        Invitation Code
-                                    </label>
-                                    <input
-                                        disabled={isProcessing}
-                                        type="text"
-                                        autoComplete='off'
-                                        required={!isLogin}
-                                        value={invitationCode} onChange={(e) => { setInvitationCode(e.target.value) }}
                                         className="w-full mt-2 px-3 py-2 text-gray-500 bg-transparent outline-none border focus:border-indigo-600 shadow-sm rounded-lg transition duration-300"
                                     />
                                 </div>
