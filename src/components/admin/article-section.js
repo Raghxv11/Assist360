@@ -1,11 +1,20 @@
-import React from 'react'
+import { addDoc, collection, doc, getDocs, getFirestore, updateDoc, where } from 'firebase/firestore';
+import React, { useEffect, useState } from 'react'
+import { fetchArticles } from '../../firebase/articles/fetch-articles';
 
 export const ArticleSection = ({
-    articles,
-    addArticle,
-    deleteArticle,
     navigate
 }) => {
+    const [articles, setArticles] = useState([])
+
+    useEffect(() => {
+   
+        fetchArticles().then((articles)=>{
+          setArticles(articles)
+        })
+      }, []);
+    
+     
   // Group articles by groupId
   const groupedArticles = articles.reduce((acc, article) => {
     const groupId = article.groupId || 'Ungrouped';
@@ -15,6 +24,56 @@ export const ArticleSection = ({
     acc[groupId].push(article);
     return acc;
   }, {});
+
+
+  const addArticle = async () => {
+    const db = getFirestore();
+    try {
+      const newArticle = {
+        level: "beginner",
+        groupId: "",
+        title: "New Article",
+        shortDescription: "",
+        keywords: [],
+        body: "",
+        references: [],
+        publicTitle: "", // For sensitive info management
+        publicDescription: "",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        restrictedTo: [], // Array of roles that can access this article
+        deleted: false,
+      };
+
+      const docRef = await addDoc(collection(db, "articles"), newArticle);
+      setArticles([...articles, { id: docRef.id, ...newArticle }]);
+    } catch (error) {
+      console.error("Error adding article:", error);
+      alert("Error adding article");
+    }
+  };
+
+  const deleteArticle = async (articleId, articleTitle) => {
+    if (
+      !window.confirm(
+        `Are you sure you want to delete the article "${articleTitle}"?`
+      )
+    ) {
+      return;
+    }
+
+    const db = getFirestore();
+    try {
+      await updateDoc(doc(db, "articles", articleId), {
+        deleted: true,
+      });
+      setArticles(articles.filter((article) => article.id !== articleId ));
+      alert("Article deleted successfully");
+    } catch (error) {
+      console.error("Error deleting article:", error);
+      alert("Error deleting article");
+    }
+  };
 
   // Sort groups by groupId
   const sortedGroups = Object.keys(groupedArticles).sort((a, b) => {
@@ -33,13 +92,43 @@ export const ArticleSection = ({
         >
           Add Article
         </button>
-        <button className='bg-purple-500 text-white px-4 py-2 rounded ml-4'>Backup</button>
       </div>
       {sortedGroups.map(groupId => (
         <div key={groupId} className="mb-8">
+            <div className='flex justify-between items-center mb-4'>
+
           <h3 className="text-xl font-semibold mb-4">
             Group {groupId}
           </h3>
+          <div className='flex gap-4'>
+
+          <button className='bg-purple-500 text-white px-4 py-2 rounded ml-4'
+          
+          onClick={()=>{
+            alert("Backup Successful")
+          }}
+          
+          >Backup</button>
+          <button className='bg-purple-500 text-white px-4 py-2 rounded ml-4'
+          onClick={async()=>{    const db = getFirestore();
+const articles = await getDocs(collection(db, "articles"), where("groupId", "==", groupId))
+           for(const article of articles.docs){
+            console.log(article)
+            await updateDoc(doc(db, "articles", article.id), {
+                deleted: false,
+              });
+           }
+           await fetchArticles().then((articles)=>{
+            setArticles(articles)
+           })
+           alert("Restore Successful")
+          }}
+          >
+            Restore
+          </button>
+            </div>
+          </div>
+
           <table className="min-w-full bg-white border border-gray-300">
             <thead>
               <tr>

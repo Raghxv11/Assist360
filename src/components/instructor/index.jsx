@@ -23,10 +23,26 @@ const Instructor = () => {
     setArticles([...articles, article]);
   };
 
-  const deleteArticle = async (id) => {
+  const deleteArticle = async (articleId, articleTitle) => {
+    if (
+      !window.confirm(
+        `Are you sure you want to delete the article "${articleTitle}"?`
+      )
+    ) {
+      return;
+    }
+
     const db = getFirestore();
-    await deleteDoc(doc(db, "articles", id));
-    setArticles(articles.filter((article) => article.id !== id));
+    try {
+      await updateDoc(doc(db, "articles", articleId), {
+        deleted: true,
+      });
+      setArticles(articles.filter((article) => article.id !== articleId ));
+      alert("Article deleted successfully");
+    } catch (error) {
+      console.error("Error deleting article:", error);
+      alert("Error deleting article");
+    }
   };
 
   // Here, additional logic can be implemented such as fetching user data, handling instructor-specific actions, etc.
@@ -48,9 +64,7 @@ const Instructor = () => {
         </tbody>
       </table>
       <ArticleSection
-        articles={articles}
-        addArticle={addArticle}
-        deleteArticle={deleteArticle}
+       
         navigate={navigate}
       />
     </div>

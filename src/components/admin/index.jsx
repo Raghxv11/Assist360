@@ -12,46 +12,13 @@ import {
 } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import { ArticleSection } from "./article-section";
+import { fetchArticles } from "../../firebase/articles/fetch-articles";
 
 const Admin = () => {
   const [users, setUsers] = useState([]);
-  const [articles, setArticles] = useState([]);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const db = getFirestore();
-      // Fetch users
-      const usersCollection = collection(db, "users");
-      const userSnapshot = await getDocs(usersCollection);
-      const userList = userSnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setUsers(userList);
-
-      // Fetch articles
-      const articlesCollection = collection(db, "articles");
-      const articleSnapshot = await getDocs(articlesCollection);
-      const articleList = articleSnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setArticles(articleList);
-    };
-    fetchData();
-  }, []);
-
-  const resetPassword = async (email) => {
-    const auth = getAuth();
-    try {
-      await sendPasswordResetEmail(auth, email);
-      alert("Password reset email sent");
-    } catch (error) {
-      console.error("Error sending password reset email:", error);
-      alert("Error sending password reset email");
-    }
-  };
+  
 
   const deleteUser = async (userId, userEmail) => {
     if (
@@ -68,6 +35,16 @@ const Admin = () => {
     } catch (error) {
       console.error("Error deleting user:", error);
       alert("Error deleting user");
+    }
+  };
+  const resetPassword = async (email) => {
+    const auth = getAuth();
+    try {
+      await sendPasswordResetEmail(auth, email);
+      alert("Password reset email sent");
+    } catch (error) {
+      console.error("Error sending password reset email:", error);
+      alert("Error sending password reset email");
     }
   };
 
@@ -119,51 +96,7 @@ const Admin = () => {
     navigate("/login");
   };
 
-  const addArticle = async () => {
-    const db = getFirestore();
-    try {
-      const newArticle = {
-        level: "beginner",
-        groupId: "",
-        title: "New Article",
-        shortDescription: "",
-        keywords: [],
-        body: "",
-        references: [],
-        publicTitle: "", // For sensitive info management
-        publicDescription: "",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        restrictedTo: [], // Array of roles that can access this article
-      };
-
-      const docRef = await addDoc(collection(db, "articles"), newArticle);
-      setArticles([...articles, { id: docRef.id, ...newArticle }]);
-    } catch (error) {
-      console.error("Error adding article:", error);
-      alert("Error adding article");
-    }
-  };
-
-  const deleteArticle = async (articleId, articleTitle) => {
-    if (
-      !window.confirm(
-        `Are you sure you want to delete the article "${articleTitle}"?`
-      )
-    ) {
-      return;
-    }
-
-    const db = getFirestore();
-    try {
-      await deleteDoc(doc(db, "articles", articleId));
-      setArticles(articles.filter((article) => article.id !== articleId));
-      alert("Article deleted successfully");
-    } catch (error) {
-      console.error("Error deleting article:", error);
-      alert("Error deleting article");
-    }
-  };
+  
 
   return (
     <div className="text-black mt-4 text-xl pt-12">
@@ -222,9 +155,7 @@ const Admin = () => {
         </tbody>
       </table>
       <ArticleSection
-        articles={articles}
-        addArticle={addArticle}
-        deleteArticle={deleteArticle}
+       
         navigate={navigate}
       />
 

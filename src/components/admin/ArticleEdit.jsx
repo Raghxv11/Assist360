@@ -22,7 +22,6 @@ const ArticleEdit = () => {
 
   useEffect(() => {
     const fetchArticle = async () => {
-      alert(id);
       if (!id) {
         setError("No article ID provided");
         setLoading(false);
