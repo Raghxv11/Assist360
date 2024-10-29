@@ -38,9 +38,9 @@ export function AuthProvider({ children }) {
         return
       }
 
-      const userData = await getUserByID(user?.email);
-      setUserData(userData);
-      setIsUserAdmin(userData?.roles?.includes("admin"));
+      const newUserData = await getUserByID(user?.email);
+      setUserData(newUserData);
+      setIsUserAdmin(newUserData?.roles?.includes("admin"));
 
       // check if the auth provider is google or not
     //   const isGoogle = user.providerData.some(
