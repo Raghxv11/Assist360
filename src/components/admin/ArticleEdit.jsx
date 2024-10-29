@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { getFirestore, doc, getDoc, updateDoc } from "firebase/firestore";
 
 const ArticleEdit = () => {
-  const { articleId } = useParams();
+  const { id } = useParams();
   const navigate = useNavigate();
   const [article, setArticle] = useState({
     title: "",
@@ -22,7 +22,8 @@ const ArticleEdit = () => {
 
   useEffect(() => {
     const fetchArticle = async () => {
-      if (!articleId) {
+      alert(id);
+      if (!id) {
         setError("No article ID provided");
         setLoading(false);
         return;
@@ -30,7 +31,7 @@ const ArticleEdit = () => {
 
       try {
         const db = getFirestore();
-        const docRef = doc(db, "articles", articleId);
+        const docRef = doc(db, "articles", id);
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
@@ -55,7 +56,7 @@ const ArticleEdit = () => {
     };
 
     fetchArticle();
-  }, [articleId, navigate]);
+  }, [id, navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -94,7 +95,7 @@ const ArticleEdit = () => {
     const db = getFirestore();
 
     try {
-      await updateDoc(doc(db, "articles", articleId), {
+      await updateDoc(doc(db, "articles", id), {
         ...article,
         updatedAt: new Date(),
       });
