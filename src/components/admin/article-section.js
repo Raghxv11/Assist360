@@ -1,3 +1,15 @@
+/**
+ * ArticleSection Component
+ *
+ * This component is responsible for rendering, adding, and managing articles within
+ * the application. Articles are grouped by `groupId` and can be created, deleted, 
+ * and managed by the user. Each group displays articles with actions for editing 
+ * and deletion, along with backup and restore options for managing group data. 
+ *
+ * @component
+ * @param {Object} props - React component props
+ * @param {function} props.navigate - Navigation function to redirect the user to article edit pages
+ */
 import { addDoc, collection, doc, getDocs, getFirestore, updateDoc, where } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react'
 import { fetchArticles } from '../../firebase/articles/fetch-articles';
@@ -5,19 +17,22 @@ import { fetchArticles } from '../../firebase/articles/fetch-articles';
 export const ArticleSection = ({
     navigate
 }) => {
-    const [articles, setArticles] = useState([])
+    const [articles, setArticles] = useState([]) // State to store articles
 
     useEffect(() => {
-   
+        // Fetches articles when the component mounts and sets them in state
         fetchArticles().then((articles)=>{
           setArticles(articles)
         })
       }, []);
     
      
-  // Group articles by groupId
+  /**
+  * Groups articles by their `groupId`, defaulting to 'Ungrouped' if no `groupId` is set.
+  * @returns {Object} - An object with group IDs as keys and arrays of articles as values
+  */
   const groupedArticles = articles.reduce((acc, article) => {
-    const groupId = article.groupId || 'Ungrouped';
+    const groupId = article.groupId || 'Ungrouped';  // Default group for articles without a groupId
     if (!acc[groupId]) {
       acc[groupId] = [];
     }
@@ -25,10 +40,13 @@ export const ArticleSection = ({
     return acc;
   }, {});
 
-
+  /**
+   * Adds a new article to Firestore with default values and updates state
+   */
   const addArticle = async () => {
     const db = getFirestore();
     try {
+      // Define default properties for a new article
       const newArticle = {
         level: "beginner",
         groupId: "",
@@ -44,16 +62,21 @@ export const ArticleSection = ({
         restrictedTo: [], // Array of roles that can access this article
         deleted: false,
       };
-
+      // Add new article to Firestore and update the local state
       const docRef = await addDoc(collection(db, "articles"), newArticle);
-      setArticles([...articles, { id: docRef.id, ...newArticle }]);
+      setArticles([...articles, { id: docRef.id, ...newArticle }]); // Add the new article to state
     } catch (error) {
       console.error("Error adding article:", error);
       alert("Error adding article");
     }
   };
-
+  /**
+  * Marks an article as deleted in Firestore by setting `deleted` to true
+  * @param {string} articleId - ID of the article to delete
+  * @param {string} articleTitle - Title of the article for user confirmation
+  */
   const deleteArticle = async (articleId, articleTitle) => {
+  // Confirm deletion with the user
     if (
       !window.confirm(
         `Are you sure you want to delete the article "${articleTitle}"?`
@@ -67,7 +90,7 @@ export const ArticleSection = ({
       await updateDoc(doc(db, "articles", articleId), {
         deleted: true,
       });
-      setArticles(articles.filter((article) => article.id !== articleId ));
+      setArticles(articles.filter((article) => article.id !== articleId )); // Update state to reflect deletion
       alert("Article deleted successfully");
     } catch (error) {
       console.error("Error deleting article:", error);
@@ -75,7 +98,9 @@ export const ArticleSection = ({
     }
   };
 
-  // Sort groups by groupId
+    /**
+     * Sorts the grouped article keys, placing 'Ungrouped' last, and returns a sorted list of keys
+     */
   const sortedGroups = Object.keys(groupedArticles).sort((a, b) => {
     if (a === 'Ungrouped') return 1;
     if (b === 'Ungrouped') return -1;
