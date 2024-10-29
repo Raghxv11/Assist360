@@ -1,15 +1,13 @@
 import Login from "./components/auth/login";
 import Register from "./components/auth/register";
-
 import Header from "./components/header";
 import Admin from "./components/admin";
-
 import { AuthProvider } from "./contexts/authContext";
 import { useRoutes } from "react-router-dom";
 import Home from "./components/auth/home";
 import Student from "./components/student";
 import Instructor from "./components/instructor";
-import ArticleEdit from "./components/ArticleEdit";
+import ArticleEdit from "./components/admin/ArticleEdit";
 
 function App() {
   const routesArray = [
@@ -38,14 +36,16 @@ function App() {
       element: <Admin />,
     },
     {
-      path: "/admin/articles/:id",
+      path: "/admin/articles/:id", // Changed from articleId to id to match useParams
       element: <ArticleEdit />,
     },
   ];
+  
   let routesElement = useRoutes(routesArray);
+  
   return (
     <AuthProvider>
-      <Header />
+      {/* <Header /> */}
       <div className="w-full h-screen flex flex-col">{routesElement}</div>
     </AuthProvider>
   );

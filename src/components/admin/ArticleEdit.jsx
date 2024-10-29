@@ -18,28 +18,40 @@ const ArticleEdit = () => {
     restrictedTo: [], // Ensure these are arrays even if empty
   });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchArticle = async () => {
-      const db = getFirestore();
-      const docRef = doc(db, "articles", articleId);
-      const docSnap = await getDoc(docRef);
-
-      if (docSnap.exists()) {
-        // Ensure arrays exist even if they're not in the document
-        const data = docSnap.data();
-        setArticle({
-          id: docSnap.id,
-          ...data,
-          keywords: data.keywords || [],
-          references: data.references || [],
-          restrictedTo: data.restrictedTo || [],
-        });
-      } else {
-        alert("Article not found");
-        navigate("/admin");
+      if (!articleId) {
+        setError("No article ID provided");
+        setLoading(false);
+        return;
       }
-      setLoading(false);
+
+      try {
+        const db = getFirestore();
+        const docRef = doc(db, "articles", articleId);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setArticle({
+            id: docSnap.id,
+            ...data,
+            keywords: data.keywords || [],
+            references: data.references || [],
+            restrictedTo: data.restrictedTo || [],
+          });
+        } else {
+          setError("Article not found");
+          navigate("/admin");
+        }
+      } catch (err) {
+        console.error("Error fetching article:", err);
+        setError("Error loading article");
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchArticle();
@@ -93,6 +105,10 @@ const ArticleEdit = () => {
       alert("Error updating article");
     }
   };
+
+  if (error) {
+    return <div className="text-center mt-8 text-red-500">{error}</div>;
+  }
 
   if (loading) {
     return <div className="text-center mt-8">Loading...</div>;
