@@ -1,26 +1,34 @@
 import React, { useState } from 'react'
 import { Navigate, Link } from 'react-router-dom'
-import { doSignInWithEmailAndPassword, doSignInWithGoogle } from '../../../firebase/auth'
-import { useAuth } from '../../../contexts/authContext'
+import { doSignInWithEmailAndPassword, doSignInWithGoogle } from '../../../firebase/auth' // Import Firebase auth methods
+import { useAuth } from '../../../contexts/authContext' // Import the authentication context
 
+// The Login component allows users to sign in with email and password
 const Login = () => {
+    // Destructure the userLoggedIn state from the authentication context
     const { userLoggedIn } = useAuth()
-
+    // Local state to manage form input fields and login status
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [isSigningIn, setIsSigningIn] = useState(false)
     const [errorMessage, setErrorMessage] = useState('')
 
+    // Function to handle the form submission when the user attempts to log in
     const onSubmit = async (e) => {
-        e.preventDefault()
+        e.preventDefault() // Prevent the form from submitting the traditional way (i.e., page reload)
+
+        // Check if the sign-in process is not already happening
         if (!isSigningIn) {
-            setIsSigningIn(true)
+            setIsSigningIn(true) // Set signing in state to true to disable the button
             try {
+                // Try to sign in with the provided email and password using Firebase Auth
                 await doSignInWithEmailAndPassword(email, password)
+                // Optionally, send email verification (commented out in the original code)
                 // doSendEmailVerification()
             } catch (error) {
+                 // Catch any errors that occur during sign-in, such as invalid credentials
                 setErrorMessage('Invalid email or password. Please try again.')
-                setIsSigningIn(false)
+                setIsSigningIn(false) // Reset signing in state to false to re-enable the button    
             }
         }
     }

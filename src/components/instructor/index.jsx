@@ -1,11 +1,12 @@
-import { React, useEffect, useState } from 'react'
-import { getAuth, sendPasswordResetEmail, signOut } from 'firebase/auth'
-import { getFirestore, collection, getDocs, doc, deleteDoc, updateDoc, setDoc } from 'firebase/firestore'
-import { useNavigate } from 'react-router-dom'
+import { React, useEffect, useState } from 'react' // Import React, useState, and useEffect hooks
+import { getAuth, sendPasswordResetEmail, signOut } from 'firebase/auth' // Import Firebase authentication functions
+import { getFirestore, collection, getDocs, doc, deleteDoc, updateDoc, setDoc } from 'firebase/firestore' // Import Firestore functions for database operations
+import { useNavigate } from 'react-router-dom' // Import useNavigate for programmatic navigation
 
+// The Instructor component represents the view for users with instructor roles
 const Instructor = () => {
   
-
+  // Here, additional logic can be implemented such as fetching user data, handling instructor-specific actions, etc.
   return (
     <div className='text-black mt-4 text-xl pt-12'>
       <div className="mb-4">
