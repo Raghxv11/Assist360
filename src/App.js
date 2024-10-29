@@ -9,6 +9,7 @@ import { useRoutes } from "react-router-dom";
 import Home from "./components/auth/home";
 import Student from "./components/student";
 import Instructor from "./components/instructor";
+import ArticleEdit from "./components/ArticleEdit";
 
 function App() {
   const routesArray = [
@@ -35,6 +36,10 @@ function App() {
     {
       path: "/admin",
       element: <Admin />,
+    },
+    {
+      path: "/admin/articles/:id",
+      element: <ArticleEdit />,
     },
   ];
   let routesElement = useRoutes(routesArray);

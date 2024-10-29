@@ -1,21 +1,29 @@
 import { React, useEffect, useState } from 'react'
 import { getAuth, sendPasswordResetEmail, signOut } from 'firebase/auth'
-import { getFirestore, collection, getDocs, doc, deleteDoc, updateDoc, setDoc } from 'firebase/firestore'
+import { getFirestore, collection, getDocs, doc, deleteDoc, updateDoc, setDoc, addDoc } from 'firebase/firestore'
 import { useNavigate } from 'react-router-dom'
 
 const Admin = () => {
   const [users, setUsers] = useState([])
+  const [articles, setArticles] = useState([])
   const navigate = useNavigate()
 
   useEffect(() => {
-    const fetchUsers = async () => {
+    const fetchData = async () => {
       const db = getFirestore()
+      // Fetch users
       const usersCollection = collection(db, 'users')
       const userSnapshot = await getDocs(usersCollection)
       const userList = userSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
       setUsers(userList)
+      
+      // Fetch articles
+      const articlesCollection = collection(db, 'articles')
+      const articleSnapshot = await getDocs(articlesCollection)
+      const articleList = articleSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+      setArticles(articleList)
     }
-    fetchUsers()
+    fetchData()
   }, [])
 
   const resetPassword = async (email) => {
@@ -88,6 +96,48 @@ const Admin = () => {
     navigate('/login')
   }
 
+  const addArticle = async () => {
+    const db = getFirestore()
+    try {
+      const newArticle = {
+        level: 'beginner',
+        groupId: '',
+        title: 'New Article',
+        shortDescription: '',
+        keywords: [],
+        body: '',
+        references: [],
+        publicTitle: '', // For sensitive info management
+        publicDescription: '',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        restrictedTo: [] // Array of roles that can access this article
+      }
+      
+      const docRef = await addDoc(collection(db, 'articles'), newArticle)
+      setArticles([...articles, { id: docRef.id, ...newArticle }])
+    } catch (error) {
+      console.error('Error adding article:', error)
+      alert('Error adding article')
+    }
+  }
+
+  const deleteArticle = async (articleId, articleTitle) => {
+    if (!window.confirm(`Are you sure you want to delete the article "${articleTitle}"?`)) {
+      return
+    }
+
+    const db = getFirestore()
+    try {
+      await deleteDoc(doc(db, 'articles', articleId))
+      setArticles(articles.filter(article => article.id !== articleId))
+      alert('Article deleted successfully')
+    } catch (error) {
+      console.error('Error deleting article:', error)
+      alert('Error deleting article')
+    }
+  }
+
   return (
     <div className='text-black mt-4 text-xl pt-12'>
       <div className="mb-4">
@@ -134,6 +184,56 @@ const Admin = () => {
           ))}
         </tbody>
       </table>
+      
+      <div className="mt-8">
+        <h2 className="text-2xl font-bold mb-4">Articles</h2>
+        <div className="mb-4">
+          <button 
+            onClick={addArticle} 
+            className="bg-green-500 text-white px-4 py-2 rounded"
+          >
+            Add Article
+          </button>
+        </div>
+        <table className="min-w-full bg-white border border-gray-300">
+          <thead>
+            <tr>
+              <th className="py-2 px-4 border-b">Title</th>
+              <th className="py-2 px-4 border-b">Level</th>
+              <th className="py-2 px-4 border-b">Group ID</th>
+              <th className="py-2 px-4 border-b">Description</th>
+              <th className="py-2 px-4 border-b">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {articles.map(article => (
+              <tr key={article.id}>
+                <td className="py-2 px-4 border-b">{article.title}</td>
+                <td className="py-2 px-4 border-b">{article.level}</td>
+                <td className="py-2 px-4 border-b">{article.groupId || 'None'}</td>
+                <td className="py-2 px-4 border-b">
+                  {article.shortDescription.substring(0, 100)}
+                  {article.shortDescription.length > 100 ? '...' : ''}
+                </td>
+                <td className="py-2 px-4 border-b">
+                  <button 
+                    onClick={() => navigate(`/admin/articles/${article.id}`)} 
+                    className="bg-blue-500 text-white px-2 py-1 rounded mr-2"
+                  >
+                    Edit
+                  </button>
+                  <button 
+                    onClick={() => deleteArticle(article.id, article.title)} 
+                    className="bg-red-500 text-white px-2 py-1 rounded"
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   )
 }
