@@ -24,12 +24,17 @@ import {
 import { useNavigate } from "react-router-dom";
 import { ArticleSection } from "./article-section";
 import { fetchArticles } from "../../firebase/articles/fetch-articles";
+import { getUsers } from "../../contexts/getUsers";
 
 const Admin = () => {
   const [users, setUsers] = useState([]); // State to store user data
   const navigate = useNavigate();
 
-  
+  useEffect(()=>{
+    getUsers().then((users)=>{
+      setUsers(users)
+    })
+  }, [])
   /**
    * Deletes a user from Firestore after user confirmation
    * @param {string} userId - ID of the user to delete
