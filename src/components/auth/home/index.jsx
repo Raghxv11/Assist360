@@ -30,7 +30,7 @@ const Home = () => {
                 <div className="mt-8 space-y-4">
                     <h3 className="text-xl font-bold text-gray-700">Your Roles:</h3>
                     {userData?.roles && userData.roles.length > 0 ? (
-                        userData.roles.map((role) => (
+                        userData?.roles.map((role) => (
                             <div key={role} className="flex items-center justify-between">
                                 <span className="text-lg text-gray-600">{role}</span>
                                 <button
@@ -48,7 +48,7 @@ const Home = () => {
                     )}
                 </div>
                 {
-                    userData.email
+                    userData?.email??""
                 }
                 
                 <div className="mt-8">
