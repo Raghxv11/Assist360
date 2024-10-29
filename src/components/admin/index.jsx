@@ -186,11 +186,11 @@ const Admin = () => {
         <tbody>
           {users.map((user) => (
             <tr key={user.id}>
-              <td className="py-2 px-4 border-b">{user.email}</td>
-              <td className="py-2 px-4 border-b">
+              <td className="py-2 px-4 border-b text-center">{user.email}</td>
+              <td className="py-2 px-4 border-b text-center">
                 {user.roles?.join(", ") || "No roles"}
               </td>
-              <td className="py-2 px-4 border-b">
+              <td className="py-2 px-4 border-b text-center">
                 <button
                   onClick={() => resetPassword(user.email)}
                   className="bg-blue-500 text-white px-2 py-1 rounded mr-2"
