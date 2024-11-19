@@ -1,3 +1,14 @@
+/**
+ * Admin Component
+ *
+ * This component provides an interface for managing users and articles within the admin
+ * section of the application. It includes functionality for deleting users, sending password
+ * reset emails, toggling user roles, generating invite codes, and signing out. Additionally,
+ * it renders the `ArticleSection` component, which handles article management.
+ *
+ * @component
+ * @param {Object} props - React component props
+ */
 import { React, useEffect, useState } from "react";
 import { getAuth, sendPasswordResetEmail, signOut } from "firebase/auth";
 import {
@@ -13,13 +24,22 @@ import {
 import { useNavigate } from "react-router-dom";
 import { ArticleSection } from "./article-section";
 import { fetchArticles } from "../../firebase/articles/fetch-articles";
+import { getUsers } from "../../contexts/getUsers";
 
 const Admin = () => {
-  const [users, setUsers] = useState([]);
+  const [users, setUsers] = useState([]); // State to store user data
   const navigate = useNavigate();
 
-  
-
+  useEffect(()=>{
+    getUsers().then((users)=>{
+      setUsers(users)
+    })
+  }, [])
+  /**
+   * Deletes a user from Firestore after user confirmation
+   * @param {string} userId - ID of the user to delete
+   * @param {string} userEmail - Email of the user, shown in confirmation prompt
+   */
   const deleteUser = async (userId, userEmail) => {
     if (
       !window.confirm(`Are you sure you want to delete the user ${userEmail}?`)
@@ -29,14 +49,19 @@ const Admin = () => {
 
     const db = getFirestore();
     try {
-      await deleteDoc(doc(db, "users", userId));
-      setUsers(users.filter((user) => user.id !== userId));
+      await deleteDoc(doc(db, "users", userId)); // Delete user document from Firestore
+      setUsers(users.filter((user) => user.id !== userId)); // Update state to reflect deletion
       alert("User deleted successfully");
     } catch (error) {
       console.error("Error deleting user:", error);
       alert("Error deleting user");
     }
   };
+
+  /**
+   * Sends a password reset email to the specified email address
+   * @param {string} email - User's email to which the password reset email is sent
+   */
   const resetPassword = async (email) => {
     const auth = getAuth();
     try {
@@ -48,11 +73,16 @@ const Admin = () => {
     }
   };
 
+  /**
+   * Toggles a specific role for a user. Adds the role if the user doesn’t have it, or removes it if they do.
+   * @param {string} userId - ID of the user
+   * @param {string} role - Role to be toggled (e.g., 'admin', 'student', 'instructor')
+   */
   const toggleRole = async (userId, role) => {
     const db = getFirestore();
-    const user = users.find((u) => u.id === userId);
-    let newRoles = [...(user.roles || [])];
-
+    const user = users.find((u) => u.id === userId); // Find user by ID
+    let newRoles = [...(user.roles || [])]; // Clone current roles
+    // Add or remove the role from the user's roles
     if (newRoles.includes(role)) {
       newRoles = newRoles.filter((r) => r !== role);
     } else {
@@ -60,7 +90,8 @@ const Admin = () => {
     }
 
     try {
-      await updateDoc(doc(db, "users", userId), { roles: newRoles });
+      await updateDoc(doc(db, "users", userId), { roles: newRoles }); // Update user roles in Firestore
+      // Update state to reflect role change
       setUsers(
         users.map((u) => (u.id === userId ? { ...u, roles: newRoles } : u))
       );
@@ -70,13 +101,15 @@ const Admin = () => {
       alert("Error updating user roles");
     }
   };
-
+  /**
+   * Generates an invitation code and stores it in Firestore, making it available for future user invites
+   */
   const generateInviteCode = async () => {
     const db = getFirestore();
     const inviteCode = Math.random()
       .toString(36)
       .substring(2, 10)
-      .toUpperCase();
+      .toUpperCase(); // Generate random invite code
     try {
       await setDoc(doc(db, "codes", inviteCode), {
         code: inviteCode,
@@ -89,7 +122,9 @@ const Admin = () => {
       alert("Error generating invite code");
     }
   };
-
+  /**
+  * Logs the user out of the application and redirects to the login page
+  */
   const logout = () => {
     const auth = getAuth();
     signOut(auth);
