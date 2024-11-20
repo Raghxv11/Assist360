@@ -1,22 +1,34 @@
-import { React, useEffect, useState } from 'react' // Import React, useState, and useEffect hooks
-import { getAuth, sendPasswordResetEmail, signOut } from 'firebase/auth' // Import Firebase authentication functions
-import { getFirestore, collection, getDocs, doc, deleteDoc, updateDoc, setDoc } from 'firebase/firestore' // Import Firestore functions for database operations
-import { useNavigate } from 'react-router-dom' // Import useNavigate for programmatic navigation
-import { ArticleSection } from '../admin/article-section'
+import React, { useEffect, useState } from 'react'; // Import React, useState, and useEffect hooks
+import { getAuth, sendPasswordResetEmail, signOut } from 'firebase/auth'; // Import Firebase authentication functions
+import { getFirestore, collection, getDocs, doc, deleteDoc, updateDoc, setDoc } from 'firebase/firestore'; // Import Firestore functions for database operations
+import { useNavigate } from 'react-router-dom'; // Import useNavigate for programmatic navigation
+import { ArticleSection } from '../admin/article-section'; // Import ArticleSection component
 
 // The Instructor component represents the view for users with instructor roles
 const Instructor = () => {
   const [articles, setArticles] = useState([]);
+  const [userId, setUserId] = useState(null); // State to store userId
   const navigate = useNavigate();
+
   useEffect(() => {
     const fetchArticles = async () => {
       const db = getFirestore();
       const snapshot = await getDocs(collection(db, "articles"));
       setArticles(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
     };
+
+    const fetchUserId = async () => {
+      const auth = getAuth();
+      const user = auth.currentUser;
+      if (user) {
+        setUserId(user.uid); // Set userId from authenticated user
+      }
+    };
+
     fetchArticles();
+    fetchUserId();
   }, []);
-  
+
   const addArticle = async (article) => {
     const db = getFirestore();
     await setDoc(doc(db, "articles", article.id), article);
@@ -37,7 +49,7 @@ const Instructor = () => {
       await updateDoc(doc(db, "articles", articleId), {
         deleted: true,
       });
-      setArticles(articles.filter((article) => article.id !== articleId ));
+      setArticles(articles.filter((article) => article.id !== articleId));
       alert("Article deleted successfully");
     } catch (error) {
       console.error("Error deleting article:", error);
@@ -49,7 +61,7 @@ const Instructor = () => {
   return (
     <div className='text-black mt-4 text-xl pt-12'>
       <div className="mb-4">
-       
+        {/* Additional UI elements can be added here */}
       </div>
       <table className="min-w-full bg-white border border-gray-300">
         <thead>
@@ -60,15 +72,17 @@ const Instructor = () => {
           </tr>
         </thead>
         <tbody>
-         THIS IS INSTRUCTOR ACCESS
+          THIS IS INSTRUCTOR ACCESS
         </tbody>
       </table>
-      <ArticleSection
-       
-        navigate={navigate}
-      />
+      {userId && (
+        <ArticleSection
+          navigate={navigate}
+          userId={userId}
+        />
+      )}
     </div>
-  )
-}
+  );
+};
 
-export default Instructor
+export default Instructor;

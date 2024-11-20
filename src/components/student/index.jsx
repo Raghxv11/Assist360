@@ -134,26 +134,26 @@ const Student = () => {
         </div>
       </div>
 
+      
       {/* Articles Display */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4">
-        
-        {filteredArticles.map(article => (
-          <div key={article.id} className="border rounded-lg p-4 hover:shadow-lg transition-shadow">
-            <h2 className="text-xl font-bold mb-2">{article.publicTitle}</h2>
-            <p className="text-gray-600 mb-2">{article.publicDescription}</p>
-            <div className="flex flex-wrap gap-2 mb-4">
-              {article.keywords?.map((keyword, index) => (
-                <span key={index} className="bg-purple-100 text-purple-800 text-sm px-2 py-1 rounded">
-                  {keyword}
-                </span>
-              ))}
-            </div>
-            <span className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">
-              {article.level}
-            </span>
-          </div>
+  {filteredArticles.map(article => (
+    <div key={article.id} className="border rounded-lg p-4 hover:shadow-lg transition-shadow">
+      <h2 className="text-xl font-bold mb-2">{article.publicTitle}</h2>
+      <p className="text-gray-600 mb-2">{article.publicDescription}</p>
+      <div className="flex flex-wrap gap-2 mb-4">
+        {article.keywords?.map((keyword, index) => (
+          <span key={index} className="bg-purple-100 text-purple-800 text-sm px-2 py-1 rounded">
+            {keyword}
+          </span>
         ))}
       </div>
+      <span className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">
+        {article.level}
+      </span>
+    </div>
+  ))}
+</div>
 
       {/* Enhanced support request section */}
       <div className="mt-12 max-w-2xl mx-auto p-4">

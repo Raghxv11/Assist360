@@ -1,38 +1,237 @@
-/**
- * ArticleSection Component
- *
- * This component is responsible for rendering, adding, and managing articles within
- * the application. Articles are grouped by `groupId` and can be created, deleted, 
- * and managed by the user. Each group displays articles with actions for editing 
- * and deletion, along with backup and restore options for managing group data. 
- *
- * @component
- * @param {Object} props - React component props
- * @param {function} props.navigate - Navigation function to redirect the user to article edit pages
- */
+// import { addDoc, collection, doc, getDocs, getFirestore, updateDoc, where } from 'firebase/firestore';
+// import React, { useEffect, useState } from 'react';
+// import { fetchArticles } from '../../firebase/articles/fetch-articles';
+
+// export const ArticleSection = ({ navigate, userId }) => {
+//   const [articles, setArticles] = useState([]);
+//   const [users, setUsers] = useState([]);
+//   const [groupedUsers, setGroupedUsers] = useState({});
+//   const [userArticleMap, setUserArticleMap] = useState({});
+//   const [selectedUsers, setSelectedUsers] = useState({});
+//   const [userGroups, setUserGroups] = useState([]); // State for grouped user table
+
+//   useEffect(() => {
+//     const fetchData = async () => {
+//       const { articles, userArticleMap, userList } = await fetchArticles(userId);
+//       setArticles(articles);
+//       setUsers(userList);
+
+//       const grouped = userList.reduce((acc, user) => {
+//         const userGroupId = user.userGroupId || "Ungrouped";
+//         if (!acc[userGroupId]) {
+//           acc[userGroupId] = [];
+//         }
+//         acc[userGroupId].push(user);
+//         return acc;
+//       }, {});
+//       setGroupedUsers(grouped);
+//       setUserArticleMap(userArticleMap);
+//     };
+
+//     fetchData();
+//   }, [userId]);
+
+//   /**
+//    * Groups articles by their `groupId`, defaulting to 'Ungrouped' if no `groupId` is set.
+//    */
+//   const groupedArticles = articles.reduce((acc, article) => {
+//     const groupId = article.groupId || 'Ungrouped';
+//     if (!acc[groupId]) {
+//       acc[groupId] = [];
+//     }
+//     acc[groupId].push(article);
+//     return acc;
+//   }, {});
+
+//   /**
+//    * Adds selected users to a user group.
+//    * @param {string} groupId - The article group ID.
+//    */
+//   const addToUserGroup = (groupId) => {
+//     const selectedGroupUsers = selectedUsers[groupId];
+//     if (!selectedGroupUsers || selectedGroupUsers.length === 0) {
+//       alert(`No users selected for Group ${groupId}`);
+//       return;
+//     }
+
+//     const groupData = {
+//       groupId,
+//       users: selectedGroupUsers,
+//     };
+
+//     setUserGroups([...userGroups, groupData]); // Add new user group to the table
+
+//     setSelectedUsers((prev) => ({
+//       ...prev,
+//       [groupId]: [], // Reset selected users for this group
+//     }));
+
+//     alert(`Users successfully added to Group ${groupId}`);
+//   };
+
+//   /**
+//    * Deletes a user group.
+//    * @param {string} groupId - The user group ID.
+//    */
+//   const deleteUserGroup = (groupId) => {
+//     setUserGroups(userGroups.filter((group) => group.groupId !== groupId));
+//     alert(`User group ${groupId} deleted successfully.`);
+//   };
+
+//   const sortedGroups = Object.keys(groupedArticles).sort((a, b) => {
+//     if (a === 'Ungrouped') return 1;
+//     if (b === 'Ungrouped') return -1;
+//     return parseInt(a) - parseInt(b);
+//   });
+
+//   return (
+//     <div className="mt-8">
+//       <h2 className="text-2xl font-bold mb-4">Articles</h2>
+//       <div className="mb-4">
+//         <button
+//           onClick={addArticle}
+//           className="bg-green-500 text-white px-4 py-2 rounded"
+//         >
+//           Add Article
+//         </button>
+//       </div>
+
+//       {/* Loop through each article group */}
+//       {sortedGroups.map((groupId) => (
+//         <div key={groupId} className="mb-12"> {/* Increased margin for clarity */}
+//           <div className="flex justify-between items-center mb-6"> {/* Adjusted spacing */}
+//             <h3 className="text-xl font-semibold">Group {groupId}</h3>
+//             <div className="flex gap-4"> {/* Buttons for Backup and Restore */}
+//               <button
+//                 className="bg-purple-500 text-white px-4 py-2 rounded"
+//                 onClick={() => alert("Backup Successful")}
+//               >
+//                 Backup
+//               </button>
+//               <button
+//                 className="bg-purple-500 text-white px-4 py-2 rounded"
+//                 onClick={async () => {
+//                   const db = getFirestore();
+//                   const articlesSnapshot = await getDocs(collection(db, "articles"), where("groupId", "==", groupId));
+//                   for (const article of articlesSnapshot.docs) {
+//                     await updateDoc(doc(db, "articles", article.id), {
+//                       deleted: false,
+//                     });
+//                   }
+//                   const fetchedData = await fetchArticles(userId);
+//                   setArticles(fetchedData.articles);
+//                   alert("Restore Successful");
+//                 }}
+//               >
+//                 Restore
+//               </button>
+//             </div>
+//           </div>
+
+//           {/* Table of Articles */}
+//           <table className="min-w-full bg-white border border-gray-300 mb-6">
+//             <thead>
+//               <tr>
+//                 <th className="py-2 px-4 border-b">Title</th>
+//                 <th className="py-2 px-4 border-b">Level</th>
+//                 <th className="py-2 px-4 border-b">Description</th>
+//                 <th className="py-2 px-4 border-b">Actions</th>
+//               </tr>
+//             </thead>
+//             <tbody>
+//               {groupedArticles[groupId].map((article) => (
+//                 <tr key={article.id}>
+//                   <td className="py-2 px-4 border-b text-center">{article.title}</td>
+//                   <td className="py-2 px-4 border-b text-center">{article.level}</td>
+//                   <td className="py-2 px-4 border-b text-center">
+//                     {article.shortDescription.substring(0, 100)}
+//                     {article.shortDescription.length > 100 ? "..." : ""}
+//                   </td>
+//                   <td className="py-2 px-4 border-b text-center">
+//                     <button
+//                       onClick={() => navigate(`/admin/articles/${article.id}`)}
+//                       className="bg-blue-500 text-white px-2 py-1 rounded mr-2"
+//                     >
+//                       Edit
+//                     </button>
+//                     <button
+//                       onClick={() => deleteArticle(article.id, article.title)}
+//                       className="bg-red-500 text-white px-2 py-1 rounded"
+//                     >
+//                       Delete
+//                     </button>
+//                   </td>
+//                 </tr>
+//               ))}
+//             </tbody>
+//           </table>
+//         </div>
+//       ))}
+
+//       {/* Grouped Users Section */}
+//       <div className="mt-16">
+//         <h2 className="text-2xl font-bold mb-4">Grouped Users</h2>
+//         <table className="min-w-full bg-white border border-gray-300">
+//           <thead>
+//             <tr>
+//               <th className="py-2 px-4 border-b">Users</th>
+//               <th className="py-2 px-4 border-b">Article Group</th>
+//               <th className="py-2 px-4 border-b">Actions</th>
+//             </tr>
+//           </thead>
+//           <tbody>
+//             {userGroups.map((group, index) => (
+//               <tr key={index}>
+//                 <td className="py-2 px-4 border-b">{group.users.join(", ")}</td>
+//                 <td className="py-2 px-4 border-b">{group.groupId}</td>
+//                 <td className="py-2 px-4 border-b text-center">
+//                   <button
+//                     onClick={() => deleteUserGroup(group.groupId)}
+//                     className="bg-red-500 text-white px-2 py-1 rounded"
+//                   >
+//                     Delete
+//                   </button>
+//                 </td>
+//               </tr>
+//             ))}
+//           </tbody>
+//         </table>
+//       </div>
+//     </div>
+//   );
+// }
+
+// export default ArticleSection;
+
+
 import { addDoc, collection, doc, getDocs, getFirestore, updateDoc, where } from 'firebase/firestore';
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react';
 import { fetchArticles } from '../../firebase/articles/fetch-articles';
 
 export const ArticleSection = ({
-    navigate
+  navigate
 }) => {
-    const [articles, setArticles] = useState([]) // State to store articles
+  const [articles, setArticles] = useState([]); // State to store articles
+  const [users, setUsers] = useState([]); // State to store users
+  const [selectedUsers, setSelectedUsers] = useState({}); // Selected users for each group
+  const [userGroups, setUserGroups] = useState([]); // State for user groups
 
-    useEffect(() => {
-        // Fetches articles when the component mounts and sets them in state
-        fetchArticles().then((articles)=>{
-          setArticles(articles)
-        })
-      }, []);
-    
-     
+  useEffect(() => {
+    // Fetches articles and users when the component mounts
+    const fetchData = async () => {
+      const { articles, userList } = await fetchArticles();
+      setArticles(articles);
+      setUsers(userList || []); // Ensure we have a default empty array if userList is undefined
+    };
+
+    fetchData();
+  }, []);
+
   /**
-  * Groups articles by their `groupId`, defaulting to 'Ungrouped' if no `groupId` is set.
-  * @returns {Object} - An object with group IDs as keys and arrays of articles as values
-  */
+   * Groups articles by their `groupId`, defaulting to 'Ungrouped' if no `groupId` is set.
+   */
   const groupedArticles = articles.reduce((acc, article) => {
-    const groupId = article.groupId || 'Ungrouped';  // Default group for articles without a groupId
+    const groupId = article.groupId || 'Ungrouped';
     if (!acc[groupId]) {
       acc[groupId] = [];
     }
@@ -41,12 +240,11 @@ export const ArticleSection = ({
   }, {});
 
   /**
-   * Adds a new article to Firestore with default values and updates state
+   * Adds a new article to Firestore with default values
    */
   const addArticle = async () => {
     const db = getFirestore();
     try {
-      // Define default properties for a new article
       const newArticle = {
         level: "beginner",
         groupId: "",
@@ -55,33 +253,26 @@ export const ArticleSection = ({
         keywords: [],
         body: "",
         references: [],
-        publicTitle: "", // For sensitive info management
+        publicTitle: "",
         publicDescription: "",
         createdAt: new Date(),
         updatedAt: new Date(),
-        restrictedTo: [], // Array of roles that can access this article
+        restrictedTo: [],
         deleted: false,
       };
-      // Add new article to Firestore and update the local state
       const docRef = await addDoc(collection(db, "articles"), newArticle);
-      setArticles([...articles, { id: docRef.id, ...newArticle }]); // Add the new article to state
+      setArticles([...articles, { id: docRef.id, ...newArticle }]);
     } catch (error) {
       console.error("Error adding article:", error);
       alert("Error adding article");
     }
   };
+
   /**
-  * Marks an article as deleted in Firestore by setting `deleted` to true
-  * @param {string} articleId - ID of the article to delete
-  * @param {string} articleTitle - Title of the article for user confirmation
-  */
+   * Marks an article as deleted in Firestore
+   */
   const deleteArticle = async (articleId, articleTitle) => {
-  // Confirm deletion with the user
-    if (
-      !window.confirm(
-        `Are you sure you want to delete the article "${articleTitle}"?`
-      )
-    ) {
+    if (!window.confirm(`Are you sure you want to delete the article "${articleTitle}"?`)) {
       return;
     }
 
@@ -90,7 +281,7 @@ export const ArticleSection = ({
       await updateDoc(doc(db, "articles", articleId), {
         deleted: true,
       });
-      setArticles(articles.filter((article) => article.id !== articleId )); // Update state to reflect deletion
+      setArticles(articles.filter((article) => article.id !== articleId));
       alert("Article deleted successfully");
     } catch (error) {
       console.error("Error deleting article:", error);
@@ -98,9 +289,38 @@ export const ArticleSection = ({
     }
   };
 
-    /**
-     * Sorts the grouped article keys, placing 'Ungrouped' last, and returns a sorted list of keys
-     */
+  /**
+   * Adds selected users to a user group
+   */
+  const addToUserGroup = (groupId) => {
+    const selectedGroupUsers = selectedUsers[groupId];
+    if (!selectedGroupUsers || selectedGroupUsers.length === 0) {
+      alert(`No users selected for Group ${groupId}`);
+      return;
+    }
+
+    const groupData = {
+      groupId,
+      users: selectedGroupUsers,
+    };
+
+    setUserGroups([...userGroups, groupData]);
+    setSelectedUsers((prev) => ({
+      ...prev,
+      [groupId]: [],
+    }));
+
+    alert(`Users successfully added to Group ${groupId}`);
+  };
+
+  /**
+   * Deletes a user group
+   */
+  const deleteUserGroup = (groupId) => {
+    setUserGroups(userGroups.filter((group) => group.groupId !== groupId));
+    alert(`User group ${groupId} deleted successfully.`);
+  };
+
   const sortedGroups = Object.keys(groupedArticles).sort((a, b) => {
     if (a === 'Ungrouped') return 1;
     if (b === 'Ungrouped') return -1;
@@ -118,39 +338,70 @@ export const ArticleSection = ({
           Add Article
         </button>
       </div>
+
       {sortedGroups.map(groupId => (
         <div key={groupId} className="mb-8">
-            <div className='flex justify-between items-center mb-4'>
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-xl font-semibold">Group {groupId}</h3>
+            <div className="flex gap-4 items-center">
+              {/* User Selection Dropdown */}
+              <div className="flex items-center">
+                <label className="font-medium mr-2">Select Users:</label>
+                <select
+                  multiple
+                  value={selectedUsers[groupId] || []}
+                  onChange={(e) => {
+                    const options = e.target.options;
+                    const selected = [];
+                    for (let i = 0; i < options.length; i++) {
+                      if (options[i].selected) {
+                        selected.push(options[i].value);
+                      }
+                    }
+                    setSelectedUsers((prev) => ({
+                      ...prev,
+                      [groupId]: selected,
+                    }));
+                  }}
+                  className="border rounded p-2 w-64 h-32"
+                >
+                  {users.map((user) => (
+                    <option key={user.id} value={user.email?.split("@")[0] || user.id}>
+                      {user.email?.split("@")[0] || user.id}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  onClick={() => addToUserGroup(groupId)}
+                  className="bg-blue-500 text-white px-4 py-2 rounded ml-4"
+                >
+                  Add to Group
+                </button>
+              </div>
 
-          <h3 className="text-xl font-semibold mb-4">
-            Group {groupId}
-          </h3>
-          <div className='flex gap-4'>
-
-          <button className='bg-purple-500 text-white px-4 py-2 rounded ml-4'
-          
-          onClick={()=>{
-            alert("Backup Successful")
-          }}
-          
-          >Backup</button>
-          <button className='bg-purple-500 text-white px-4 py-2 rounded ml-4'
-          onClick={async()=>{    const db = getFirestore();
-const articles = await getDocs(collection(db, "articles"), where("groupId", "==", groupId))
-           for(const article of articles.docs){
-            console.log(article)
-            await updateDoc(doc(db, "articles", article.id), {
-                deleted: false,
-              });
-           }
-           await fetchArticles().then((articles)=>{
-            setArticles(articles)
-           })
-           alert("Restore Successful")
-          }}
-          >
-            Restore
-          </button>
+              <button
+                className="bg-purple-500 text-white px-4 py-2 rounded"
+                onClick={() => alert("Backup Successful")}
+              >
+                Backup
+              </button>
+              <button
+                className="bg-purple-500 text-white px-4 py-2 rounded"
+                onClick={async () => {
+                  const db = getFirestore();
+                  const articlesSnapshot = await getDocs(collection(db, "articles"), where("groupId", "==", groupId));
+                  for (const article of articlesSnapshot.docs) {
+                    await updateDoc(doc(db, "articles", article.id), {
+                      deleted: false,
+                    });
+                  }
+                  const { articles: updatedArticles } = await fetchArticles();
+                  setArticles(updatedArticles);
+                  alert("Restore Successful");
+                }}
+              >
+                Restore
+              </button>
             </div>
           </div>
 
@@ -192,6 +443,38 @@ const articles = await getDocs(collection(db, "articles"), where("groupId", "=="
           </table>
         </div>
       ))}
+
+      {/* Grouped Users Section */}
+      <div className="mt-8">
+        <h2 className="text-2xl font-bold mb-4">Grouped Users</h2>
+        <table className="min-w-full bg-white border border-gray-300">
+          <thead>
+            <tr>
+              <th className="py-2 px-4 border-b">Users</th>
+              <th className="py-2 px-4 border-b">Article Group</th>
+              <th className="py-2 px-4 border-b">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {userGroups.map((group, index) => (
+              <tr key={index}>
+                <td className="py-2 px-4 border-b">{group.users.join(", ")}</td>
+                <td className="py-2 px-4 border-b">{group.groupId}</td>
+                <td className="py-2 px-4 border-b text-center">
+                  <button
+                    onClick={() => deleteUserGroup(group.groupId)}
+                    className="bg-red-500 text-white px-2 py-1 rounded"
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
-}
+};
+
+export default ArticleSection;
