@@ -27,6 +27,12 @@ import { ArticleSection } from "./article-section";
 import { fetchArticles } from "../../firebase/articles/fetch-articles";
 import { getUsers } from "../../contexts/getUsers";
 
+const GROUP_MAP = {
+  1: "Group 1",
+  2: "Group 2",
+  3: "Group 3"
+};
+
 const Admin = () => {
   const [users, setUsers] = useState([]); // State to store user data
   const navigate = useNavigate();
@@ -135,7 +141,6 @@ const Admin = () => {
   const assignGroup = async (userId, groupId) => {
     const db = getFirestore();
     try {
-      // First verify the user document exists
       const userRef = doc(db, "users", userId);
       const userSnap = await getDoc(userRef);
       
@@ -143,25 +148,40 @@ const Admin = () => {
         throw new Error("User document not found");
       }
 
-      // Update the user document
+      // Get current groups array or initialize empty array
+      // Ensure all groups are strings
+      const currentGroups = (userSnap.data().groups || []).map(String);
+      
+      // Convert groupId to string for comparison and storage
+      const groupIdString = String(groupId);
+      
+      // Toggle group membership
+      let newGroups;
+      if (currentGroups.includes(groupIdString)) {
+        newGroups = currentGroups.filter(g => g !== groupIdString);
+      } else {
+        newGroups = [...currentGroups, groupIdString];
+      }
+
+      // Update the user document with new groups array
       await updateDoc(userRef, {
-        group: groupId,
-        updatedAt: new Date() // Add a timestamp
+        groups: newGroups,
+        updatedAt: new Date()
       });
 
       // Update local state
       setUsers(prevUsers => 
         prevUsers.map(user => 
           user.id === userId 
-            ? { ...user, group: groupId }
+            ? { ...user, groups: newGroups }
             : user
         )
       );
 
-      alert("Group assigned successfully");
+      alert("Groups updated successfully");
     } catch (error) {
-      console.error("Error assigning group:", error);
-      alert(`Error assigning group: ${error.message}`);
+      console.error("Error updating groups:", error);
+      alert(`Error updating groups: ${error.message}`);
     }
   };
 
@@ -203,16 +223,19 @@ const Admin = () => {
                 >
                   Delete User
                 </button>
-                <select
-                  onChange={(e) => assignGroup(user.id, e.target.value)}
-                  value={user.group || ""}
-                  className="bg-gray-300 text-black px-2 py-1 rounded mr-2"
-                >
-                  <option value="">Select Group</option>
-                  <option value="group1">Group 1</option>
-                  <option value="group2">Group 2</option>
-                  <option value="group3">Group 3</option>
-                </select>
+                <td className="py-2 px-4 border-b text-center">
+                  {Object.entries(GROUP_MAP).map(([groupId, groupName]) => (
+                    <label key={groupId} className="inline-flex items-center mr-4">
+                      <input
+                        type="checkbox"
+                        checked={user.groups?.includes(String(groupId)) || false}
+                        onChange={() => assignGroup(user.id, String(groupId))}
+                        className="form-checkbox h-4 w-4 text-blue-600"
+                      />
+                      <span className="ml-2">{groupName}</span>
+                    </label>
+                  ))}
+                </td>
                 {["admin", "student", "instructor"].map((role) => (
                   <button
                     key={role}

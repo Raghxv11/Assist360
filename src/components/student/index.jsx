@@ -26,16 +26,27 @@ const Student = () => {
         );
 
         // Only add group filter if user has a group assigned
-        if (userData.group) {
+        if (userData.groups) {
           q = query(
             collection(db, "articles"),
-            where("restrictedTo", "array-contains", "student"),
-            where("groupId", "==", userData.group)
+            where("groupId", "in", userData.groups)
+          );
+        }
+
+        let individualQuery = null;
+        if(userData.email) {
+          individualQuery = query(
+            collection(db, "articles"),
+            where("individualAccess", "array-contains", userData.email)
           );
         }
         
-        const querySnapshot = await getDocs(q);
-        const articleData = querySnapshot.docs.map(doc => ({
+        const [groupSnapshot, individualSnapshot] = await Promise.all([
+          getDocs(q),
+          individualQuery ? getDocs(individualQuery) : Promise.resolve({ docs: [] })
+        ]);
+
+        const articleData = [...groupSnapshot.docs, ...individualSnapshot.docs].map(doc => ({
           id: doc.id,
           ...doc.data()
         }));
