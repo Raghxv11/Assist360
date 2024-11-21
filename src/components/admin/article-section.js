@@ -83,29 +83,8 @@ export const ArticleSection = ({
     }
   };
 
-  /**
-   * Adds selected users to a user group
-   */
-  const addToUserGroup = (groupId) => {
-    const selectedGroupUsers = selectedUsers[groupId];
-    if (!selectedGroupUsers || selectedGroupUsers.length === 0) {
-      alert(`No users selected for Group ${groupId}`);
-      return;
-    }
 
-    const groupData = {
-      groupId,
-      users: selectedGroupUsers,
-    };
-
-    setUserGroups([...userGroups, groupData]);
-    setSelectedUsers((prev) => ({
-      ...prev,
-      [groupId]: [],
-    }));
-
-    alert(`Users successfully added to Group ${groupId}`);
-  };
+  
 
   /**
    * Deletes a user group
@@ -138,40 +117,7 @@ export const ArticleSection = ({
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-xl font-semibold">Group {groupId}</h3>
             <div className="flex gap-4 items-center">
-              {/* User Selection Dropdown */}
-              <div className="flex items-center">
-                <label className="font-medium mr-2">Select Users:</label>
-                <select
-                  multiple
-                  value={selectedUsers[groupId] || []}
-                  onChange={(e) => {
-                    const options = e.target.options;
-                    const selected = [];
-                    for (let i = 0; i < options.length; i++) {
-                      if (options[i].selected) {
-                        selected.push(options[i].value);
-                      }
-                    }
-                    setSelectedUsers((prev) => ({
-                      ...prev,
-                      [groupId]: selected,
-                    }));
-                  }}
-                  className="border rounded p-2 w-64 h-32"
-                >
-                  {users.map((user) => (
-                    <option key={user.id} value={user.email?.split("@")[0] || user.id}>
-                      {user.email?.split("@")[0] || user.id}
-                    </option>
-                  ))}
-                </select>
-                <button
-                  onClick={() => addToUserGroup(groupId)}
-                  className="bg-blue-500 text-white px-4 py-2 rounded ml-4"
-                >
-                  Add to Group
-                </button>
-              </div>
+              
 
               <button
                 className="bg-purple-500 text-white px-4 py-2 rounded"
