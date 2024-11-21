@@ -6,6 +6,7 @@ export async function getUsers(){
  const usersList = []
  users.forEach((user) => {
   usersList.push({
+    id: user.id,
     ...user.data(),
   })
  })

@@ -11,32 +11,38 @@ import {
 import { collection, deleteDoc, doc, getDoc, getDocs, setDoc } from "firebase/firestore";
 export const doCreateUserWithEmailAndPassword = async (email, password, inviteCode) => {
   const users = await getDocs(collection(FIRESTORE_DB, "users"));
-  //if its a first user, set it as admin
-  let isAdmin = false;
-  if (users.empty) {
-    isAdmin = true;
-  }
-  if(!isAdmin  && inviteCode ===""){
- alert("Please enter a valid invite code");
- return false;
-  }
-
-  //check if the invite code is valid
-  if(!isAdmin){
-  const inviteCodeDoc = await getDoc(doc(FIRESTORE_DB, "codes", inviteCode));
-  if (!inviteCodeDoc.exists()) {
-    alert("Invalid invite code");
+  let isAdmin = users.empty;
+  
+  if(!isAdmin && inviteCode === "") {
+    alert("Please enter a valid invite code");
     return false;
   }
-}
-  await createUserWithEmailAndPassword(auth, email, password);
 
-  await deleteDoc(doc(FIRESTORE_DB, "codes", inviteCode));
-  await setDoc(doc(FIRESTORE_DB, "users", email), {
+  if(!isAdmin) {
+    const inviteCodeDoc = await getDoc(doc(FIRESTORE_DB, "codes", inviteCode));
+    if (!inviteCodeDoc.exists()) {
+      alert("Invalid invite code");
+      return false;
+    }
+  }
+
+  // Create the user authentication
+  const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+  const uid = userCredential.user.uid; // Get the user's UID
+
+  // Delete the invite code if used
+  if (inviteCode) {
+    await deleteDoc(doc(FIRESTORE_DB, "codes", inviteCode));
+  }
+
+  // Create the user document with the UID as the document ID
+  await setDoc(doc(FIRESTORE_DB, "users", uid), {
     email: email,
-    password: password,
     roles: [isAdmin ? "admin" : "student"],
+    group: "", // Initialize empty group
+    createdAt: new Date()
   });
+
   return true;
 };
 

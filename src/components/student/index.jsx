@@ -1,7 +1,9 @@
 import { React, useState, useEffect } from 'react'
 import { getFirestore, collection, getDocs, query, where } from 'firebase/firestore'
+import { useAuth } from '../../contexts/authContext'
 
 const Student = () => {
+  const { userData } = useAuth();
   const [articles, setArticles] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredArticles, setFilteredArticles] = useState([]);
@@ -14,13 +16,24 @@ const Student = () => {
   // Fetch articles that students have access to
   useEffect(() => {
     const fetchArticles = async () => {
+      if (!userData) return; // Wait for userData to be available
+
       const db = getFirestore();
-      const q = query(
-        collection(db, "articles"),
-        where("restrictedTo", "array-contains", "student")
-      );
-      
       try {
+        let q = query(
+          collection(db, "articles"),
+          where("restrictedTo", "array-contains", "student")
+        );
+
+        // Only add group filter if user has a group assigned
+        if (userData.group) {
+          q = query(
+            collection(db, "articles"),
+            where("restrictedTo", "array-contains", "student"),
+            where("groupId", "==", userData.group)
+          );
+        }
+        
         const querySnapshot = await getDocs(q);
         const articleData = querySnapshot.docs.map(doc => ({
           id: doc.id,
@@ -34,7 +47,7 @@ const Student = () => {
     };
 
     fetchArticles();
-  }, []);
+  }, [userData]);
 
   // Enhanced search functionality
   const handleSearch = (e) => {

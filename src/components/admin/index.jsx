@@ -20,6 +20,7 @@ import {
   updateDoc,
   setDoc,
   addDoc,
+  getDoc,
 } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import { ArticleSection } from "./article-section";
@@ -131,7 +132,38 @@ const Admin = () => {
     navigate("/login");
   };
 
-  
+  const assignGroup = async (userId, groupId) => {
+    const db = getFirestore();
+    try {
+      // First verify the user document exists
+      const userRef = doc(db, "users", userId);
+      const userSnap = await getDoc(userRef);
+      
+      if (!userSnap.exists()) {
+        throw new Error("User document not found");
+      }
+
+      // Update the user document
+      await updateDoc(userRef, {
+        group: groupId,
+        updatedAt: new Date() // Add a timestamp
+      });
+
+      // Update local state
+      setUsers(prevUsers => 
+        prevUsers.map(user => 
+          user.id === userId 
+            ? { ...user, group: groupId }
+            : user
+        )
+      );
+
+      alert("Group assigned successfully");
+    } catch (error) {
+      console.error("Error assigning group:", error);
+      alert(`Error assigning group: ${error.message}`);
+    }
+  };
 
   return (
     <div className="text-black mt-4 text-xl pt-12">
@@ -171,6 +203,16 @@ const Admin = () => {
                 >
                   Delete User
                 </button>
+                <select
+                  onChange={(e) => assignGroup(user.id, e.target.value)}
+                  value={user.group || ""}
+                  className="bg-gray-300 text-black px-2 py-1 rounded mr-2"
+                >
+                  <option value="">Select Group</option>
+                  <option value="group1">Group 1</option>
+                  <option value="group2">Group 2</option>
+                  <option value="group3">Group 3</option>
+                </select>
                 {["admin", "student", "instructor"].map((role) => (
                   <button
                     key={role}
@@ -183,6 +225,7 @@ const Admin = () => {
                   >
                     {role}
                   </button>
+                
                 ))}
               </td>
             </tr>
