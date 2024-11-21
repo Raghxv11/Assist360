@@ -22,6 +22,8 @@ const ArticleEdit = () => {
   const [error, setError] = useState(null);
   const [users, setUsers] = useState([]); // State to store users
   const [userGroups, setUserGroups] = useState({}); // State to store user groups
+  const [selectedUsers, setSelectedUsers] = useState([]);
+  const [allUsers, setAllUsers] = useState([]);
 
   useEffect(() => {
     const fetchArticle = async () => {
@@ -46,6 +48,11 @@ const ArticleEdit = () => {
             restrictedTo: data.restrictedTo || [],
           });
 
+          // Initialize selectedUsers if individualAccess exists
+          if (data.individualAccess) {
+            setSelectedUsers(data.individualAccess);
+          }
+
           // Map userGroupId to pre-fill checkboxes
           if (data.userGroupId) {
             const groupIds = Array.isArray(data.userGroupId)
@@ -69,15 +76,14 @@ const ArticleEdit = () => {
       }
     };
 
-
     const fetchUsers = async () => {
       const db = getFirestore();
       const usersSnapshot = await getDocs(collection(db, "users"));
-      const usersList = usersSnapshot.docs.map((doc) => ({
+      const usersList = usersSnapshot.docs.map(doc => ({
         id: doc.id,
-        ...doc.data(),
+        email: doc.data().email
       }));
-      setUsers(usersList);
+      setAllUsers(usersList);
     };
 
     fetchArticle();
@@ -128,6 +134,16 @@ const ArticleEdit = () => {
     });
   };
 
+  const handleUserAccessToggle = (userId) => {
+    setSelectedUsers(prev => {
+      if (prev.includes(userId)) {
+        return prev.filter(id => id !== userId);
+      } else {
+        return [...prev, userId];
+      }
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const db = getFirestore();
@@ -135,7 +151,7 @@ const ArticleEdit = () => {
     try {
       await updateDoc(doc(db, "articles", id), {
         ...article,
-        restrictedTo: Object.keys(userGroups), // Save as an array of user IDs
+        individualAccess: selectedUsers,
         updatedAt: new Date(),
       });
       alert("Article updated successfully");
@@ -280,6 +296,23 @@ const ArticleEdit = () => {
               >
                 {role}
               </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-6">
+          <label className="block mb-2 text-lg font-medium">Individual Access</label>
+          <div className="max-h-60 overflow-y-auto border rounded p-4">
+            {allUsers.map(user => (
+              <label key={user.id} className="flex items-center space-x-2 mb-2">
+                <input
+                  type="checkbox"
+                  checked={selectedUsers.includes(user.id)}
+                  onChange={() => handleUserAccessToggle(user.id)}
+                  className="form-checkbox h-4 w-4 text-blue-600"
+                />
+                <span>{user.email}</span>
+              </label>
             ))}
           </div>
         </div>
