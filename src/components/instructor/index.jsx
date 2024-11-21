@@ -1,9 +1,13 @@
+// Import required dependencies from React and Firebase
+
+
 import React, { useEffect, useState } from 'react'; // Import React, useState, and useEffect hooks
 import { getAuth, sendPasswordResetEmail, signOut } from 'firebase/auth'; // Import Firebase authentication functions
 import { getFirestore, collection, getDocs, doc, deleteDoc, updateDoc, setDoc } from 'firebase/firestore'; // Import Firestore functions for database operations
 import { useNavigate } from 'react-router-dom'; // Import useNavigate for programmatic navigation
 import { ArticleSection } from '../admin/article-section'; // Import ArticleSection component
 
+// State variables for managing component data
 // The Instructor component represents the view for users with instructor roles
 const Instructor = () => {
   const [articles, setArticles] = useState([]);

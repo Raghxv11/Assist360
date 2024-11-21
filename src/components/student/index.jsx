@@ -2,6 +2,7 @@ import { React, useState, useEffect } from 'react'
 import { getFirestore, collection, getDocs, query, where } from 'firebase/firestore'
 import { useAuth } from '../../contexts/authContext'
 
+// State variables for managing component data
 const Student = () => {
   const { userData } = useAuth();
   const [articles, setArticles] = useState([]);
@@ -33,23 +34,28 @@ const Student = () => {
           );
         }
 
+        // Add individual access filter based on the user's email
         let individualQuery = null;
-        if(userData.email) {
+        if (userData.email) {
           individualQuery = query(
             collection(db, "articles"),
             where("individualAccess", "array-contains", userData.email)
           );
         }
-        
+
+        // Fetch articles for groups and individual access concurrently
         const [groupSnapshot, individualSnapshot] = await Promise.all([
           getDocs(q),
           individualQuery ? getDocs(individualQuery) : Promise.resolve({ docs: [] })
         ]);
 
+        // Combine fetched articles into a single array
         const articleData = [...groupSnapshot.docs, ...individualSnapshot.docs].map(doc => ({
           id: doc.id,
           ...doc.data()
         }));
+
+        // Set the state with the fetched articles
         setArticles(articleData);
         setFilteredArticles(articleData);
       } catch (error) {
@@ -60,17 +66,18 @@ const Student = () => {
     fetchArticles();
   }, [userData]);
 
+  // Handles the search input and updates filtered articles
   // Enhanced search functionality
   const handleSearch = (e) => {
     const term = e.target.value.toLowerCase();
     setSearchTerm(term);
-    
+
     // Add search term to history
     if (term) {
       setSearchHistory(prev => [...prev, { term, timestamp: new Date() }]);
     }
 
-    let filtered = articles.filter(article => 
+    let filtered = articles.filter(article =>
       article.keywords?.some(keyword => keyword.toLowerCase().includes(term)) ||
       article.publicTitle.toLowerCase().includes(term) ||
       article.publicDescription.toLowerCase().includes(term)
@@ -109,7 +116,7 @@ const Student = () => {
       searchHistory: type === 'specific' ? searchHistory : [],
       timestamp: new Date()
     };
-    
+
     // Here you would implement the actual support request submission
     console.log('Support request:', supportData);
     alert(`${type} support request submitted`);
@@ -133,15 +140,16 @@ const Student = () => {
     return parseInt(a) - parseInt(b);
   });
 
+  // Render the component
   return (
     <div className='text-black mt-4 text-xl pt-12'>
       <div className="mb-8 flex flex-col justify-center items-center">
         <h1 className='text-4xl font-bold text-center'>Articles</h1>
         <p className='text-lg text-center mt-4'>Here you can find all the articles that you have access to.</p>
-        
+
         {/* Add filters section */}
         <div className="w-full max-w-2xl flex gap-4 mb-4">
-          <select 
+          <select
             value={selectedLevel}
             onChange={handleLevelChange}
             className="p-2 border rounded-lg"
@@ -167,7 +175,7 @@ const Student = () => {
         </div>
       </div>
 
-      
+
       {/* Articles Display */}
       {sortedGroups.map(groupId => (
         <div key={groupId} className="mb-8 px-4">
