@@ -184,35 +184,7 @@ export const ArticleSection = ({
         </div>
       ))}
 
-      {/* Grouped Users Section */}
-      <div className="mt-8">
-        <h2 className="text-2xl font-bold mb-4">Grouped Users</h2>
-        <table className="min-w-full bg-white border border-gray-300">
-          <thead>
-            <tr>
-              <th className="py-2 px-4 border-b">Users</th>
-              <th className="py-2 px-4 border-b">Article Group</th>
-              <th className="py-2 px-4 border-b">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {userGroups.map((group, index) => (
-              <tr key={index}>
-                <td className="py-2 px-4 border-b">{group.users.join(", ")}</td>
-                <td className="py-2 px-4 border-b">{group.groupId}</td>
-                <td className="py-2 px-4 border-b text-center">
-                  <button
-                    onClick={() => deleteUserGroup(group.groupId)}
-                    className="bg-red-500 text-white px-2 py-1 rounded"
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      
     </div>
   );
 };

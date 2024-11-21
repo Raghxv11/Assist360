@@ -116,6 +116,23 @@ const Student = () => {
     setSupportMessage('');
   };
 
+  // Add this new function after the existing useEffect
+  const groupedArticles = filteredArticles.reduce((acc, article) => {
+    const groupId = article.groupId || 'Ungrouped';
+    if (!acc[groupId]) {
+      acc[groupId] = [];
+    }
+    acc[groupId].push(article);
+    return acc;
+  }, {});
+
+  // Sort the groups (Ungrouped goes last)
+  const sortedGroups = Object.keys(groupedArticles).sort((a, b) => {
+    if (a === 'Ungrouped') return 1;
+    if (b === 'Ungrouped') return -1;
+    return parseInt(a) - parseInt(b);
+  });
+
   return (
     <div className='text-black mt-4 text-xl pt-12'>
       <div className="mb-8 flex flex-col justify-center items-center">
@@ -136,14 +153,6 @@ const Student = () => {
             <option value="expert">Expert</option>
           </select>
 
-          <select
-            value={selectedGroup}
-            onChange={handleGroupChange}
-            className="p-2 border rounded-lg"
-          >
-            <option value="all">All Groups</option>
-            {/* Add group options dynamically */}
-          </select>
         </div>
 
         {/* Search Section */}
@@ -160,24 +169,31 @@ const Student = () => {
 
       
       {/* Articles Display */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4">
-  {filteredArticles.map(article => (
-    <div key={article.id} className="border rounded-lg p-4 hover:shadow-lg transition-shadow">
-      <h2 className="text-xl font-bold mb-2">{article.publicTitle}</h2>
-      <p className="text-gray-600 mb-2">{article.publicDescription}</p>
-      <div className="flex flex-wrap gap-2 mb-4">
-        {article.keywords?.map((keyword, index) => (
-          <span key={index} className="bg-purple-100 text-purple-800 text-sm px-2 py-1 rounded">
-            {keyword}
-          </span>
-        ))}
-      </div>
-      <span className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">
-        {article.level}
-      </span>
-    </div>
-  ))}
-</div>
+      {sortedGroups.map(groupId => (
+        <div key={groupId} className="mb-8 px-4">
+          <h2 className="text-2xl font-bold mb-4">
+            {groupId === 'Ungrouped' ? 'Ungrouped Articles' : `Group ${groupId}`}
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {groupedArticles[groupId].map(article => (
+              <div key={article.id} className="border rounded-lg p-4 hover:shadow-lg transition-shadow">
+                <h2 className="text-xl font-bold mb-2">{article.publicTitle}</h2>
+                <p className="text-gray-600 mb-2">{article.publicDescription}</p>
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {article.keywords?.map((keyword, index) => (
+                    <span key={index} className="bg-purple-100 text-purple-800 text-sm px-2 py-1 rounded">
+                      {keyword}
+                    </span>
+                  ))}
+                </div>
+                <span className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                  {article.level}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
 
       {/* Enhanced support request section */}
       <div className="mt-12 max-w-2xl mx-auto p-4">
