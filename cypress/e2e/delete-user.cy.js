@@ -14,7 +14,7 @@ describe('Delete User Functionality', () => {
   it('should successfully delete a user after confirmation', () => {
     // Find an existing user in the table
     cy.get('[data-testid="users-table"]')
-      .contains('tr', 'aryashdubey1@gmail.com')
+      .contains('tr', 'aryashdubey2@gmail.com')
       .within(() => {
         cy.get('[data-testid="delete-user-button"]').click()
       })
@@ -31,13 +31,13 @@ describe('Delete User Functionality', () => {
     })
 
     // Verify user is removed from the table
-    cy.contains('aryashdubey1@gmail.com').should('not.exist')
+    cy.contains('aryashdubey2@gmail.com').should('not.exist')
   })
 
   it('should not delete user when canceling confirmation', () => {
     // Find an existing user in the table
     cy.get('[data-testid="users-table"]')
-      .contains('tr', 'aryashdubey1@gmail.com')
+      .contains('tr', 'aryashdubey2@gmail.com')
       .within(() => {
         cy.get('[data-testid="delete-user-button"]').click()
       })
@@ -46,7 +46,7 @@ describe('Delete User Functionality', () => {
     cy.on('window:confirm', () => false)
 
     // Verify user still exists in the table
-    cy.contains('aryashdubey1@gmail.com').should('exist')
+    cy.contains('aryashdubey2@gmail.com').should('exist')
   })
 
   it('should show error message when deletion fails', () => {
@@ -63,7 +63,7 @@ describe('Delete User Functionality', () => {
 
     // Find an existing user and click delete
     cy.get('[data-testid="users-table"]')
-      .contains('tr', 'aryashdubey1@gmail.com')
+      .contains('tr', 'aryashdubey2@gmail.com')
       .within(() => {
         cy.get('[data-testid="delete-user-button"]').click()
       })
