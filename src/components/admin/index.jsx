@@ -30,18 +30,18 @@ import { getUsers } from "../../contexts/getUsers";
 const GROUP_MAP = {
   1: "Group 1",
   2: "Group 2",
-  3: "Group 3"
+  3: "Group 3",
 };
 
 const Admin = () => {
   const [users, setUsers] = useState([]); // State to store user data
   const navigate = useNavigate();
 
-  useEffect(()=>{
-    getUsers().then((users)=>{
-      setUsers(users)
-    })
-  }, [])
+  useEffect(() => {
+    getUsers().then((users) => {
+      setUsers(users);
+    });
+  }, []);
   /**
    * Deletes a user from Firestore after user confirmation
    * @param {string} userId - ID of the user to delete
@@ -130,8 +130,8 @@ const Admin = () => {
     }
   };
   /**
-  * Logs the user out of the application and redirects to the login page
-  */
+   * Logs the user out of the application and redirects to the login page
+   */
   const logout = () => {
     const auth = getAuth();
     signOut(auth);
@@ -143,7 +143,7 @@ const Admin = () => {
     try {
       const userRef = doc(db, "users", userId);
       const userSnap = await getDoc(userRef);
-      
+
       if (!userSnap.exists()) {
         throw new Error("User document not found");
       }
@@ -151,14 +151,14 @@ const Admin = () => {
       // Get current groups array or initialize empty array
       // Ensure all groups are strings
       const currentGroups = (userSnap.data().groups || []).map(String);
-      
+
       // Convert groupId to string for comparison and storage
       const groupIdString = String(groupId);
-      
+
       // Toggle group membership
       let newGroups;
       if (currentGroups.includes(groupIdString)) {
-        newGroups = currentGroups.filter(g => g !== groupIdString);
+        newGroups = currentGroups.filter((g) => g !== groupIdString);
       } else {
         newGroups = [...currentGroups, groupIdString];
       }
@@ -166,15 +166,13 @@ const Admin = () => {
       // Update the user document with new groups array
       await updateDoc(userRef, {
         groups: newGroups,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       });
 
       // Update local state
-      setUsers(prevUsers => 
-        prevUsers.map(user => 
-          user.id === userId 
-            ? { ...user, groups: newGroups }
-            : user
+      setUsers((prevUsers) =>
+        prevUsers.map((user) =>
+          user.id === userId ? { ...user, groups: newGroups } : user
         )
       );
 
@@ -195,7 +193,7 @@ const Admin = () => {
           Invite User
         </button>
       </div>
-      <table className="min-w-full bg-white border border-gray-300">
+      <table className="min-w-full bg-white border border-gray-300" data-testid="users-table">
         <thead>
           <tr>
             <th className="py-2 px-4 border-b">Email</th>
@@ -218,6 +216,7 @@ const Admin = () => {
                   Reset Password
                 </button>
                 <button
+                  data-testid="delete-user-button"
                   onClick={() => deleteUser(user.id, user.email)}
                   className="bg-red-500 text-white px-2 py-1 rounded mr-2"
                 >
@@ -225,10 +224,15 @@ const Admin = () => {
                 </button>
                 <td className="py-2 px-4 border-b text-center">
                   {Object.entries(GROUP_MAP).map(([groupId, groupName]) => (
-                    <label key={groupId} className="inline-flex items-center mr-4">
+                    <label
+                      key={groupId}
+                      className="inline-flex items-center mr-4"
+                    >
                       <input
                         type="checkbox"
-                        checked={user.groups?.includes(String(groupId)) || false}
+                        checked={
+                          user.groups?.includes(String(groupId)) || false
+                        }
                         onChange={() => assignGroup(user.id, String(groupId))}
                         className="form-checkbox h-4 w-4 text-blue-600"
                       />
@@ -248,19 +252,13 @@ const Admin = () => {
                   >
                     {role}
                   </button>
-                
                 ))}
               </td>
             </tr>
           ))}
         </tbody>
       </table>
-      <ArticleSection
-       
-        navigate={navigate}
-      />
-
-      
+      <ArticleSection navigate={navigate} />
     </div>
   );
 };
