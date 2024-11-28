@@ -38,7 +38,7 @@ export function AuthProvider({ children }) {
         return
       }
 
-      const newUserData = await getUserByID(user?.email);
+      const newUserData = await getUserByID(user?.uid);
       setUserData(newUserData);
       setIsUserAdmin(newUserData?.roles?.includes("admin"));
 
