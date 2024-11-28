@@ -6,12 +6,13 @@ describe('Logout Functionality', () => {
       
       // Login with test account first
       cy.visit('/login')
-      cy.get('input[type="email"]').type('aryashdubey2@gmail.com')
-      cy.get('input[type="password"]').type('123456')
+      cy.get('input[type="email"]').type('raghavb@gmail.com')
+      cy.get('input[type="password"]').type('raghav123')
       cy.get('button[type="submit"]').click()
       
       // Wait for redirect to home page
       cy.url().should('include', '/home')
+      cy.visit('/admin')
     })
   
     it('should successfully logout when clicking logout button', () => {

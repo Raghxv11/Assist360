@@ -17,6 +17,7 @@ const Student = () => {
   // Fetch articles that students have access to
   useEffect(() => {
     const fetchArticles = async () => {
+      console.log(userData);
       if (!userData) return; // Wait for userData to be available
 
       const db = getFirestore();
@@ -64,7 +65,7 @@ const Student = () => {
     };
 
     fetchArticles();
-  }, [userData]);
+  }, []);
 
   // Handles the search input and updates filtered articles
   // Enhanced search functionality
